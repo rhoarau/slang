@@ -552,10 +552,20 @@ protected:
 
     void processMutableParam(IRParam* param, IROutTypeBase* paramPtrType)
     {
-        // The deafult handling of any mutable (`out` or `inout`) parameter
+        //////////////////////////////////////////////////////////////////////////////////
+        // TODO RHO: we need a better way to inhibit this param process for CUDA callable entry points
+
+        // bool isCUDAEntryPointVaryingParamLegalizeContext = dynamic_cast<CUDAEntryPointVaryingParamLegalizeContext*>(this) != nullptr;
+        // if (m_stage == Stage::Callable && isCUDAEntryPointVaryingParamLegalizeContext)
+        //     return;
+        if (m_stage == Stage::Callable)
+            return;
+        //////////////////////////////////////////////////////////////////////////////////
+
+        // The default handling of any mutable (`out` or `inout`) parameter
         // will be to introduce a local variable of the corresponding
         // type and to use that in place of the actual parameter during
-        // exeuction of the function.
+        // execution of the function.
 
         // The replacement variable will have the type of the original
         // parameter (the `T` in `Out<T>` or `InOut<T>`).
@@ -585,7 +595,7 @@ protected:
         }
 
         // Because the `out` or `inout` parameter is represented
-        // as a pointer, and our local variabel is also a pointer
+        // as a pointer, and our local variable is also a pointer
         // we can directly replace all uses of the original parameter
         // with uses of the variable.
         //

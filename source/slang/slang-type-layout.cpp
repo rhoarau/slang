@@ -1009,12 +1009,9 @@ HLSLRayTracingLayoutRulesImpl kHLSLHitAttributesParameterLayoutRulesImpl(
 // CUDAVaryingLayoutRulesImpl kCUDAVaryingInputLayoutRulesImpl(LayoutResourceKind::VertexInput);
 // CUDAVaryingLayoutRulesImpl kCUDAVaryingOutputLayoutRulesImpl(LayoutResourceKind::FragmentOutput);
 //
-CUDARayTracingLayoutRulesImpl kCUDARayPayloadParameterLayoutRulesImpl(
-    LayoutResourceKind::RayPayload);
-// CUDARayTracingLayoutRulesImpl
-// kCUDACallablePayloadParameterLayoutRulesImpl(LayoutResourceKind::CallablePayload);
-CUDARayTracingLayoutRulesImpl kCUDAHitAttributesParameterLayoutRulesImpl(
-    LayoutResourceKind::HitAttributes);
+CUDARayTracingLayoutRulesImpl kCUDARayPayloadParameterLayoutRulesImpl(LayoutResourceKind::RayPayload);
+CUDARayTracingLayoutRulesImpl kCUDACallablePayloadParameterLayoutRulesImpl(LayoutResourceKind::CallablePayload);
+CUDARayTracingLayoutRulesImpl kCUDAHitAttributesParameterLayoutRulesImpl(LayoutResourceKind::HitAttributes);
 
 MetalVaryingLayoutRulesImpl kMetalVaryingInputLayoutRulesImpl(LayoutResourceKind::VertexInput);
 MetalVaryingLayoutRulesImpl kMetalVaryingOutputLayoutRulesImpl(LayoutResourceKind::FragmentOutput);
@@ -1349,6 +1346,10 @@ LayoutRulesImpl kCUDARayPayloadParameterLayoutRulesImpl_ = {
     &kCUDALayoutRulesFamilyImpl,
     &kCUDARayPayloadParameterLayoutRulesImpl,
     &kCUDAObjectLayoutRulesImpl,
+};
+
+LayoutRulesImpl kCUDACallablePayloadParameterLayoutRulesImpl_ = {
+    &kCUDALayoutRulesFamilyImpl, &kCUDACallablePayloadParameterLayoutRulesImpl, &kCUDAObjectLayoutRulesImpl,
 };
 
 LayoutRulesImpl kCUDAHitAttributesParameterLayoutRulesImpl_ = {
@@ -1798,7 +1799,7 @@ LayoutRulesImpl* CUDALayoutRulesFamilyImpl::getRayPayloadParameterRules()
 }
 LayoutRulesImpl* CUDALayoutRulesFamilyImpl::getCallablePayloadParameterRules()
 {
-    return nullptr;
+    return &kCUDACallablePayloadParameterLayoutRulesImpl_;
 }
 LayoutRulesImpl* CUDALayoutRulesFamilyImpl::getHitAttributesParameterRules()
 {
