@@ -798,6 +798,9 @@ SlangResult NVRTCDownstreamCompiler::compile(
             break;
         }
     }
+    // Enable optimization as workaround for the following NVRTC error when we compile with debug info:
+    // "inlinable function call in a function with debug info must have a !dbg location"
+    cmdLine.addArg("--dopt=on");
 
     // Don't seem to have such a control, so ignore for now
     // switch (options.optimizationLevel)
@@ -997,6 +1000,12 @@ SlangResult NVRTCDownstreamCompiler::compile(
         dstOptions[i] = cmdLine.m_args[i].getBuffer();
     }
 
+    // std::string_view lSource((const char *)sourceBlob->getBufferPointer(), sourceBlob->getBufferSize());
+    // std::cout << "sourceBlob:\n" << lSource << std::endl;
+    // for(auto& arg : dstOptions)
+    // {
+    //     std::cout << "- NVRTC arg: " << arg << std::endl;
+    // }
     res = m_nvrtcCompileProgram(program, int(dstOptions.getCount()), dstOptions.getBuffer());
 
     auto artifact = ArtifactUtil::createArtifactForCompileTarget(options.targetType);
