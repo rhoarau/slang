@@ -154,8 +154,7 @@ const char* getBuildTagString()
         // If the tag is unknown, then we will try to get the timestamp of the shared library
         // and use that as the version string, so that we can at least return something
         // that uniquely identifies the build.
-        static String timeStampString =
-            String(SharedLibraryUtils::getSharedLibraryTimestamp((void*)spCreateSession));
+        String timeStampString = String(SharedLibraryUtils::getSharedLibraryTimestamp((void*)spCreateSession));
         return timeStampString.getBuffer();
     }
     return SLANG_TAG_VERSION;
