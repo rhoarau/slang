@@ -156,24 +156,31 @@ SLANG_NO_THROW SlangResult SLANG_MCALL DeviceImpl::initialize(const Desc& desc)
 
     SLANG_RETURN_ON_FAIL(_initCuda(reportType));
 
-    if (desc.adapterLUID)
-    {
-        int deviceCount = -1;
-        cuDeviceGetCount(&deviceCount);
-        for (int deviceIndex = 0; deviceIndex < deviceCount; ++deviceIndex)
-        {
-            if (cuda::getAdapterLUID(deviceIndex) == *desc.adapterLUID)
-            {
-                m_deviceIndex = deviceIndex;
-                break;
-            }
-        }
-        if (m_deviceIndex >= deviceCount)
-            return SLANG_E_INVALID_ARG;
+    // If the user give a cuda device ordinal id through the field desc.existingDeviceHandles.
+    if (desc.existingDeviceHandles.handles[0].handleValue != 0) {
+        m_deviceIndex = (int)(desc.existingDeviceHandles.handles[0].handleValue);
     }
-    else
-    {
-        SLANG_RETURN_ON_FAIL(_findMaxFlopsDeviceIndex(&m_deviceIndex));
+    else {
+        // The LUID method to select a GPU is only supported under Windows and only in WDDM mode, not in TCC mode. 
+        if (desc.adapterLUID)
+        {
+            int deviceCount = -1;
+            cuDeviceGetCount(&deviceCount);
+            for (int deviceIndex = 0; deviceIndex < deviceCount; ++deviceIndex)
+            {
+                if (cuda::getAdapterLUID(deviceIndex) == *desc.adapterLUID)
+                {
+                    m_deviceIndex = deviceIndex;
+                    break;
+                }
+            }
+            if (m_deviceIndex >= deviceCount)
+                return SLANG_E_INVALID_ARG;
+        }
+        else
+        {
+            SLANG_RETURN_ON_FAIL(_findMaxFlopsDeviceIndex(&m_deviceIndex));
+        }
     }
 
     m_context = new CUDAContext();
