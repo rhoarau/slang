@@ -55,12 +55,10 @@
 #define SLANG_CUDA_WARP_BITMASK (~int(0))
 
 //
-#define SLANG_FORCE_INLINE inline
-
-#define SLANG_CUDA_CALL __device__
-
-#define SLANG_FORCE_INLINE inline
+#define SLANG_FORCE_INLINE __forceinline__
 #define SLANG_INLINE inline
+
+#define SLANG_CUDA_CALL SLANG_FORCE_INLINE __device__
 
 
 // Since we are using unsigned arithmatic care is need in this comparison.
@@ -198,11 +196,11 @@ struct __align__(1) bool1
 {
     bool x;
 
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL bool& operator[](int idx)
+    SLANG_CUDA_CALL bool& operator[](int idx)
     {
         return (&x)[idx];
     }
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL const bool& operator[](int idx) const
+    SLANG_CUDA_CALL const bool& operator[](int idx) const
     {
         return (&x)[idx];
     }
@@ -212,11 +210,11 @@ struct __align__(2) bool2
 {
     bool x, y;
 
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL bool& operator[](int idx)
+    SLANG_CUDA_CALL bool& operator[](int idx)
     {
         return (&x)[idx];
     }
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL const bool& operator[](int idx) const
+    SLANG_CUDA_CALL const bool& operator[](int idx) const
     {
         return (&x)[idx];
     }
@@ -226,11 +224,11 @@ struct __align__(1) bool3
 {
     bool x, y, z;
 
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL bool& operator[](int idx)
+    SLANG_CUDA_CALL bool& operator[](int idx)
     {
         return (&x)[idx];
     }
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL const bool& operator[](int idx) const
+    SLANG_CUDA_CALL const bool& operator[](int idx) const
     {
         return (&x)[idx];
     }
@@ -240,11 +238,11 @@ struct __align__(4) bool4
 {
     bool x, y, z, w;
 
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL bool& operator[](int idx)
+    SLANG_CUDA_CALL bool& operator[](int idx)
     {
         return (&x)[idx];
     }
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL const bool& operator[](int idx) const
+    SLANG_CUDA_CALL const bool& operator[](int idx) const
     {
         return (&x)[idx];
     }
@@ -288,16 +286,16 @@ union Union64
 };
 
 template<typename T>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float make_float(T val)
+SLANG_CUDA_CALL float make_float(T val)
 {
     return (float)val;
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float _slang_fmod(float x, float y)
+SLANG_CUDA_CALL float _slang_fmod(float x, float y)
 {
     return ::fmodf(x, y);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double _slang_fmod(double x, double y)
+SLANG_CUDA_CALL double _slang_fmod(double x, double y)
 {
     return ::fmod(x, y);
 }
@@ -320,19 +318,19 @@ struct __align__(4) __half4
 #endif
 
 #define SLANG_VECTOR_GET_ELEMENT(T)                                                   \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T _slang_vector_get_element(T##1 x, int index) \
+    SLANG_CUDA_CALL T _slang_vector_get_element(T##1 x, int index) \
     {                                                                                 \
         return ((T*)(&x))[index];                                                     \
     }                                                                                 \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T _slang_vector_get_element(T##2 x, int index) \
+    SLANG_CUDA_CALL T _slang_vector_get_element(T##2 x, int index) \
     {                                                                                 \
         return ((T*)(&x))[index];                                                     \
     }                                                                                 \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T _slang_vector_get_element(T##3 x, int index) \
+    SLANG_CUDA_CALL T _slang_vector_get_element(T##3 x, int index) \
     {                                                                                 \
         return ((T*)(&x))[index];                                                     \
     }                                                                                 \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T _slang_vector_get_element(T##4 x, int index) \
+    SLANG_CUDA_CALL T _slang_vector_get_element(T##4 x, int index) \
     {                                                                                 \
         return ((T*)(&x))[index];                                                     \
     }
@@ -349,19 +347,19 @@ SLANG_VECTOR_GET_ELEMENT(float)
 SLANG_VECTOR_GET_ELEMENT(double)
 
 #define SLANG_VECTOR_GET_ELEMENT_PTR(T)                                                            \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T* _slang_vector_get_element_ptr(const T##1 * x, int index) \
+    SLANG_CUDA_CALL T* _slang_vector_get_element_ptr(const T##1 * x, int index) \
     {                                                                                              \
         return ((T*)(x)) + index;                                                                  \
     }                                                                                              \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T* _slang_vector_get_element_ptr(const T##2 * x, int index) \
+    SLANG_CUDA_CALL T* _slang_vector_get_element_ptr(const T##2 * x, int index) \
     {                                                                                              \
         return ((T*)(x)) + index;                                                                  \
     }                                                                                              \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T* _slang_vector_get_element_ptr(const T##3 * x, int index) \
+    SLANG_CUDA_CALL T* _slang_vector_get_element_ptr(const T##3 * x, int index) \
     {                                                                                              \
         return ((T*)(x)) + index;                                                                  \
     }                                                                                              \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T* _slang_vector_get_element_ptr(const T##4 * x, int index) \
+    SLANG_CUDA_CALL T* _slang_vector_get_element_ptr(const T##4 * x, int index) \
     {                                                                                              \
         return ((T*)(x)) + index;                                                                  \
     }
@@ -383,7 +381,7 @@ SLANG_VECTOR_GET_ELEMENT_PTR(__half)
 #endif
 
 #define SLANG_CUDA_VECTOR_BINARY_OP(T, n, op)                                                 \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T##n operator op(T##n thisVal, T##n other)             \
+    SLANG_CUDA_CALL T##n operator op(T##n thisVal, T##n other)             \
     {                                                                                         \
         T##n result;                                                                          \
         for (int i = 0; i < n; i++)                                                           \
@@ -392,7 +390,7 @@ SLANG_VECTOR_GET_ELEMENT_PTR(__half)
         return result;                                                                        \
     }
 #define SLANG_CUDA_VECTOR_BINARY_COMPARE_OP(T, n, op)                                           \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL bool##n operator op(T##n thisVal, T##n other)            \
+    SLANG_CUDA_CALL bool##n operator op(T##n thisVal, T##n other)            \
     {                                                                                           \
         bool##n result;                                                                         \
         for (int i = 0; i < n; i++)                                                             \
@@ -401,7 +399,7 @@ SLANG_VECTOR_GET_ELEMENT_PTR(__half)
         return result;                                                                          \
     }
 #define SLANG_CUDA_VECTOR_UNARY_OP(T, n, op)                                                       \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T##n operator op(T##n thisVal)                              \
+    SLANG_CUDA_CALL T##n operator op(T##n thisVal)                              \
     {                                                                                              \
         T##n result;                                                                               \
         for (int i = 0; i < n; i++)                                                                \
@@ -472,7 +470,7 @@ SLANG_CUDA_VECTOR_FLOAT_OPS(double)
 SLANG_CUDA_VECTOR_FLOAT_OPS(__half)
 #endif
 #define SLANG_CUDA_FLOAT_VECTOR_MOD_IMPL(T, n)                                             \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T##n operator%(const T##n& left, const T##n& right) \
+    SLANG_CUDA_CALL T##n operator%(const T##n& left, const T##n& right) \
     {                                                                                      \
         T##n result;                                                                       \
         for (int i = 0; i < n; i++)                                                        \
@@ -491,15 +489,15 @@ SLANG_CUDA_FLOAT_VECTOR_MOD(double)
 
 #if SLANG_CUDA_RTC || SLANG_CUDA_ENABLE_HALF
 #define SLANG_MAKE_VECTOR(T)                                                \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T##2 make_##T##2(T x, T y)           \
+    SLANG_CUDA_CALL T##2 make_##T##2(T x, T y)           \
     {                                                                       \
         return T##2 {x, y};                                                 \
     }                                                                       \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T##3 make_##T##3(T x, T y, T z)      \
+    SLANG_CUDA_CALL T##3 make_##T##3(T x, T y, T z)      \
     {                                                                       \
         return T##3 {x, y, z};                                              \
     }                                                                       \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T##4 make_##T##4(T x, T y, T z, T w) \
+    SLANG_CUDA_CALL T##4 make_##T##4(T x, T y, T z, T w) \
     {                                                                       \
         return T##4 {x, y, z, w};                                           \
     }
@@ -522,64 +520,64 @@ SLANG_MAKE_VECTOR(ulonglong)
 SLANG_MAKE_VECTOR(__half)
 #endif
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL bool1 make_bool1(bool x)
+SLANG_CUDA_CALL bool1 make_bool1(bool x)
 {
     return bool1{x};
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL bool2 make_bool2(bool x, bool y)
+SLANG_CUDA_CALL bool2 make_bool2(bool x, bool y)
 {
     return bool2{x, y};
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL bool3 make_bool3(bool x, bool y, bool z)
+SLANG_CUDA_CALL bool3 make_bool3(bool x, bool y, bool z)
 {
     return bool3{x, y, z};
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL bool4 make_bool4(bool x, bool y, bool z, bool w)
+SLANG_CUDA_CALL bool4 make_bool4(bool x, bool y, bool z, bool w)
 {
     return bool4{x, y, z, w};
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL bool2 make_bool2(bool x)
+SLANG_CUDA_CALL bool2 make_bool2(bool x)
 {
     return bool2{x, x};
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL bool3 make_bool3(bool x)
+SLANG_CUDA_CALL bool3 make_bool3(bool x)
 {
     return bool3{x, x, x};
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL bool4 make_bool4(bool x)
+SLANG_CUDA_CALL bool4 make_bool4(bool x)
 {
     return bool4{x, x, x, x};
 }
 
 #if SLANG_CUDA_RTC
 #define SLANG_MAKE_VECTOR_FROM_SCALAR(T)                     \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T##1 make_##T##1(T x) \
+    SLANG_CUDA_CALL T##1 make_##T##1(T x) \
     {                                                        \
         return T##1 {x};                                     \
     }                                                        \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T##2 make_##T##2(T x) \
+    SLANG_CUDA_CALL T##2 make_##T##2(T x) \
     {                                                        \
         return make_##T##2(x, x);                            \
     }                                                        \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T##3 make_##T##3(T x) \
+    SLANG_CUDA_CALL T##3 make_##T##3(T x) \
     {                                                        \
         return make_##T##3(x, x, x);                         \
     }                                                        \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T##4 make_##T##4(T x) \
+    SLANG_CUDA_CALL T##4 make_##T##4(T x) \
     {                                                        \
         return make_##T##4(x, x, x, x);                      \
     }
 #else
 #define SLANG_MAKE_VECTOR_FROM_SCALAR(T)                     \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T##2 make_##T##2(T x) \
+    SLANG_CUDA_CALL T##2 make_##T##2(T x) \
     {                                                        \
         return make_##T##2(x, x);                            \
     }                                                        \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T##3 make_##T##3(T x) \
+    SLANG_CUDA_CALL T##3 make_##T##3(T x) \
     {                                                        \
         return make_##T##3(x, x, x);                         \
     }                                                        \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T##4 make_##T##4(T x) \
+    SLANG_CUDA_CALL T##4 make_##T##4(T x) \
     {                                                        \
         return make_##T##4(x, x, x, x);                      \
     }
@@ -597,7 +595,7 @@ SLANG_MAKE_VECTOR_FROM_SCALAR(double)
 #if SLANG_CUDA_ENABLE_HALF
 SLANG_MAKE_VECTOR_FROM_SCALAR(__half)
 #if !SLANG_CUDA_RTC
-SLANG_FORCE_INLINE SLANG_CUDA_CALL __half1 make___half1(__half x)
+SLANG_CUDA_CALL __half1 make___half1(__half x)
 {
     return __half1{x};
 }
@@ -605,7 +603,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL __half1 make___half1(__half x)
 #endif
 
 #define SLANG_CUDA_VECTOR_ATOMIC_BINARY_IMPL(Fn, T, N)                                            \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T##N Fn(T##N* address, T##N val)                           \
+    SLANG_CUDA_CALL T##N Fn(T##N* address, T##N val)                           \
     {                                                                                             \
         T##N result;                                                                              \
         for (int i = 0; i < N; i++)                                                               \
@@ -639,7 +637,7 @@ struct GetVectorTypeImpl
     struct GetVectorTypeImpl<T, n>                                     \
     {                                                                  \
         typedef T##n type;                                             \
-        static SLANG_FORCE_INLINE SLANG_CUDA_CALL T##n fromScalar(T v) \
+        static SLANG_CUDA_CALL T##n fromScalar(T v) \
         {                                                              \
             return make_##T##n(v);                                     \
         }                                                              \
@@ -668,7 +666,7 @@ template<typename T, int n>
 using Vector = typename GetVectorTypeImpl<T, n>::type;
 
 template<typename T, int n, typename OtherT, int m>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL Vector<T, n> _slang_vector_reshape(const Vector<OtherT, m> other)
+SLANG_CUDA_CALL Vector<T, n> _slang_vector_reshape(const Vector<OtherT, m> other)
 {
     Vector<T, n> result;
     for (int i = 0; i < n; i++)
@@ -685,12 +683,12 @@ template<typename T, int ROWS, int COLS>
 struct Matrix
 {
     Vector<T, COLS> rows[ROWS];
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL Vector<T, COLS>& operator[](size_t index)
+    SLANG_CUDA_CALL Vector<T, COLS>& operator[](size_t index)
     {
         return rows[index];
     }
 
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL const Vector<T, COLS>& operator[](size_t index) const
+    SLANG_CUDA_CALL const Vector<T, COLS>& operator[](size_t index) const
     {
         return rows[index];
     }
@@ -698,7 +696,7 @@ struct Matrix
 
 
 template<typename T, int ROWS, int COLS>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(T scalar)
+SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(T scalar)
 {
     Matrix<T, ROWS, COLS> result;
     for (int i = 0; i < ROWS; i++)
@@ -707,7 +705,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(T scalar)
 }
 
 template<typename T, int ROWS, int COLS>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(const Vector<T, COLS>& row0)
+SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(const Vector<T, COLS>& row0)
 {
     Matrix<T, ROWS, COLS> result;
     result.rows[0] = row0;
@@ -715,7 +713,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(const Vector
 }
 
 template<typename T, int ROWS, int COLS>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
+SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
     const Vector<T, COLS>& row0,
     const Vector<T, COLS>& row1)
 {
@@ -726,7 +724,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
 }
 
 template<typename T, int ROWS, int COLS>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
+SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
     const Vector<T, COLS>& row0,
     const Vector<T, COLS>& row1,
     const Vector<T, COLS>& row2)
@@ -739,7 +737,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
 }
 
 template<typename T, int ROWS, int COLS>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
+SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
     const Vector<T, COLS>& row0,
     const Vector<T, COLS>& row1,
     const Vector<T, COLS>& row2,
@@ -754,7 +752,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
 }
 
 template<typename T, int ROWS, int COLS, typename U, int otherRow, int otherCol>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
+SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
     const Matrix<U, otherRow, otherCol>& other)
 {
     Matrix<T, ROWS, COLS> result;
@@ -772,7 +770,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
 }
 
 template<typename T, int ROWS, int COLS>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(T v0, T v1, T v2, T v3)
+SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(T v0, T v1, T v2, T v3)
 {
     Matrix<T, ROWS, COLS> rs;
     rs.rows[0].x = v0;
@@ -783,7 +781,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(T v0, T v1, 
 }
 
 template<typename T, int ROWS, int COLS>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
+SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
     T v0,
     T v1,
     T v2,
@@ -814,7 +812,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
 }
 
 template<typename T, int ROWS, int COLS>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
+SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
     T v0,
     T v1,
     T v2,
@@ -851,7 +849,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
 }
 
 template<typename T, int ROWS, int COLS>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
+SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
     T v0,
     T v1,
     T v2,
@@ -876,7 +874,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
 }
 
 template<typename T, int ROWS, int COLS>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
+SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
     T v0,
     T v1,
     T v2,
@@ -925,7 +923,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
 }
 
 template<typename T, int ROWS, int COLS>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
+SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
     T v0,
     T v1,
     T v2,
@@ -965,7 +963,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
 
 #define SLANG_MATRIX_BINARY_OP(T, op)                                   \
     template<int R, int C>                                              \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, R, C> operator op(     \
+    SLANG_CUDA_CALL Matrix<T, R, C> operator op(     \
         const Matrix<T, R, C>& thisVal,                                 \
         const Matrix<T, R, C>& other)                                   \
     {                                                                   \
@@ -980,7 +978,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, ROWS, COLS> makeMatrix(
 
 #define SLANG_MATRIX_UNARY_OP(T, op)                                                               \
     template<int R, int C>                                                                         \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, R, C> operator op(const Matrix<T, R, C>& thisVal) \
+    SLANG_CUDA_CALL Matrix<T, R, C> operator op(const Matrix<T, R, C>& thisVal) \
     {                                                                                              \
         Matrix<T, R, C> result;                                                                    \
         for (int i = 0; i < R; i++)                                                                \
@@ -1023,7 +1021,7 @@ SLANG_FLOAT_MATRIX_OPS(__half)
 #endif
 #define SLANG_MATRIX_INT_NEG_OP(T)                                                        \
     template<int R, int C>                                                                \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, R, C> operator-(Matrix<T, R, C> thisVal) \
+    SLANG_CUDA_CALL Matrix<T, R, C> operator-(Matrix<T, R, C> thisVal) \
     {                                                                                     \
         Matrix<T, R, C> result;                                                           \
         for (int i = 0; i < R; i++)                                                       \
@@ -1043,7 +1041,7 @@ SLANG_MATRIX_INT_NEG_OP(ulonglong)
 
 #define SLANG_FLOAT_MATRIX_MOD(T)                                                 \
     template<int R, int C>                                                        \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<T, R, C> operator%(                 \
+    SLANG_CUDA_CALL Matrix<T, R, C> operator%(                 \
         Matrix<T, R, C> left,                                                     \
         Matrix<T, R, C> right)                                                    \
     {                                                                             \
@@ -1060,7 +1058,7 @@ SLANG_FLOAT_MATRIX_MOD(float)
 SLANG_FLOAT_MATRIX_MOD(double)
 #if SLANG_CUDA_ENABLE_HALF
 template<int R, int C>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<__half, R, C> operator%(
+SLANG_CUDA_CALL Matrix<__half, R, C> operator%(
     Matrix<__half, R, C> left,
     Matrix<__half, R, C> right)
 {
@@ -1082,7 +1080,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL Matrix<__half, R, C> operator%(
 #undef SLANG_FLOAT_MATRIX_MOD
 
 #define SLANG_SELECT_IMPL(T, N)                                                                  \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL Vector<T, N> _slang_select(                               \
+    SLANG_CUDA_CALL Vector<T, N> _slang_select(                               \
         bool##N condition,                                                                       \
         Vector<T, N> v0,                                                                         \
         Vector<T, N> v1)                                                                         \
@@ -1112,7 +1110,7 @@ SLANG_SELECT_T(float)
 SLANG_SELECT_T(double)
 
 template<typename T>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL T _slang_select(bool condition, T v0, T v1)
+SLANG_CUDA_CALL T _slang_select(bool condition, T v0, T v1)
 {
     return condition ? v0 : v1;
 }
@@ -1126,15 +1124,15 @@ SLANG_SELECT_T(__half)
 
 // Convenience functions ushort -> half
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL __half2 __ushort_as_half(const ushort2& i)
+SLANG_CUDA_CALL __half2 __ushort_as_half(const ushort2& i)
 {
     return __halves2half2(__ushort_as_half(i.x), __ushort_as_half(i.y));
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL __half3 __ushort_as_half(const ushort3& i)
+SLANG_CUDA_CALL __half3 __ushort_as_half(const ushort3& i)
 {
     return __half3{__ushort_as_half(i.x), __ushort_as_half(i.y), __ushort_as_half(i.z)};
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL __half4 __ushort_as_half(const ushort4& i)
+SLANG_CUDA_CALL __half4 __ushort_as_half(const ushort4& i)
 {
     return __half4{
         __ushort_as_half(i.x),
@@ -1145,15 +1143,15 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL __half4 __ushort_as_half(const ushort4& i)
 
 // Convenience functions half -> ushort
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL ushort2 __half_as_ushort(const __half2& i)
+SLANG_CUDA_CALL ushort2 __half_as_ushort(const __half2& i)
 {
     return make_ushort2(__half_as_ushort(i.x), __half_as_ushort(i.y));
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL ushort3 __half_as_ushort(const __half3& i)
+SLANG_CUDA_CALL ushort3 __half_as_ushort(const __half3& i)
 {
     return make_ushort3(__half_as_ushort(i.x), __half_as_ushort(i.y), __half_as_ushort(i.z));
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL ushort4 __half_as_ushort(const __half4& i)
+SLANG_CUDA_CALL ushort4 __half_as_ushort(const __half4& i)
 {
     return make_ushort4(
         __half_as_ushort(i.x),
@@ -1189,7 +1187,7 @@ struct __nv_isurf_trait<__half4>
 
 #define SLANG_SURFACE_READ(FUNC_NAME, TYPE_ARGS, ARGS)                                             \
     template<>                                                                                     \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL __half FUNC_NAME<__half>(                                   \
+    SLANG_CUDA_CALL __half FUNC_NAME<__half>(                                   \
         cudaSurfaceObject_t surfObj,                                                               \
         SLANG_DROP_PARENS TYPE_ARGS,                                                               \
         cudaSurfaceBoundaryMode boundaryMode)                                                      \
@@ -1198,7 +1196,7 @@ struct __nv_isurf_trait<__half4>
     }                                                                                              \
                                                                                                    \
     template<>                                                                                     \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL __half2 FUNC_NAME<__half2>(                                 \
+    SLANG_CUDA_CALL __half2 FUNC_NAME<__half2>(                                 \
         cudaSurfaceObject_t surfObj,                                                               \
         SLANG_DROP_PARENS TYPE_ARGS,                                                               \
         cudaSurfaceBoundaryMode boundaryMode)                                                      \
@@ -1208,7 +1206,7 @@ struct __nv_isurf_trait<__half4>
     }                                                                                              \
                                                                                                    \
     template<>                                                                                     \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL __half4 FUNC_NAME<__half4>(                                 \
+    SLANG_CUDA_CALL __half4 FUNC_NAME<__half4>(                                 \
         cudaSurfaceObject_t surfObj,                                                               \
         SLANG_DROP_PARENS TYPE_ARGS,                                                               \
         cudaSurfaceBoundaryMode boundaryMode)                                                      \
@@ -1227,7 +1225,7 @@ SLANG_SURFACE_READ(surfCubemapLayeredread, (int x, int y, int layerFace), (x, y,
 
 #define SLANG_SURFACE_WRITE(FUNC_NAME, TYPE_ARGS, ARGS)                                            \
     template<>                                                                                     \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL void FUNC_NAME<__half>(                                     \
+    SLANG_CUDA_CALL void FUNC_NAME<__half>(                                     \
         __half data,                                                                               \
         cudaSurfaceObject_t surfObj,                                                               \
         SLANG_DROP_PARENS TYPE_ARGS,                                                               \
@@ -1237,7 +1235,7 @@ SLANG_SURFACE_READ(surfCubemapLayeredread, (int x, int y, int layerFace), (x, y,
     }                                                                                              \
                                                                                                    \
     template<>                                                                                     \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL void FUNC_NAME<__half2>(                                    \
+    SLANG_CUDA_CALL void FUNC_NAME<__half2>(                                    \
         __half2 data,                                                                              \
         cudaSurfaceObject_t surfObj,                                                               \
         SLANG_DROP_PARENS TYPE_ARGS,                                                               \
@@ -1247,7 +1245,7 @@ SLANG_SURFACE_READ(surfCubemapLayeredread, (int x, int y, int layerFace), (x, y,
     }                                                                                              \
                                                                                                    \
     template<>                                                                                     \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL void FUNC_NAME<__half4>(                                    \
+    SLANG_CUDA_CALL void FUNC_NAME<__half4>(                                    \
         __half4 data,                                                                              \
         cudaSurfaceObject_t surfObj,                                                               \
         SLANG_DROP_PARENS TYPE_ARGS,                                                               \
@@ -1268,19 +1266,19 @@ SLANG_SURFACE_WRITE(surfCubemapLayeredwrite, (int x, int y, int layerFace), (x, 
 // Only works converting *from* half
 
 // template <typename T>
-// SLANG_FORCE_INLINE SLANG_CUDA_CALL T surf2Dread_convert(cudaSurfaceObject_t surfObj, int x, int
+// SLANG_CUDA_CALL T surf2Dread_convert(cudaSurfaceObject_t surfObj, int x, int
 // y, cudaSurfaceBoundaryMode boundaryMode);
 
 #define SLANG_SURFACE_READ_HALF_CONVERT(FUNC_NAME, TYPE_ARGS, ARGS)                              \
                                                                                                  \
     template<typename T>                                                                         \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL T FUNC_NAME##_convert(                                    \
+    SLANG_CUDA_CALL T FUNC_NAME##_convert(                                    \
         cudaSurfaceObject_t surfObj,                                                             \
         SLANG_DROP_PARENS TYPE_ARGS,                                                             \
         cudaSurfaceBoundaryMode boundaryMode);                                                   \
                                                                                                  \
     template<>                                                                                   \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL float FUNC_NAME##_convert<float>(                         \
+    SLANG_CUDA_CALL float FUNC_NAME##_convert<float>(                         \
         cudaSurfaceObject_t surfObj,                                                             \
         SLANG_DROP_PARENS TYPE_ARGS,                                                             \
         cudaSurfaceBoundaryMode boundaryMode)                                                    \
@@ -1290,7 +1288,7 @@ SLANG_SURFACE_WRITE(surfCubemapLayeredwrite, (int x, int y, int layerFace), (x, 
     }                                                                                            \
                                                                                                  \
     template<>                                                                                   \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL float2 FUNC_NAME##_convert<float2>(                       \
+    SLANG_CUDA_CALL float2 FUNC_NAME##_convert<float2>(                       \
         cudaSurfaceObject_t surfObj,                                                             \
         SLANG_DROP_PARENS TYPE_ARGS,                                                             \
         cudaSurfaceBoundaryMode boundaryMode)                                                    \
@@ -1301,7 +1299,7 @@ SLANG_SURFACE_WRITE(surfCubemapLayeredwrite, (int x, int y, int layerFace), (x, 
     }                                                                                            \
                                                                                                  \
     template<>                                                                                   \
-    SLANG_FORCE_INLINE SLANG_CUDA_CALL float4 FUNC_NAME##_convert<float4>(                       \
+    SLANG_CUDA_CALL float4 FUNC_NAME##_convert<float4>(                       \
         cudaSurfaceObject_t surfObj,                                                             \
         SLANG_DROP_PARENS TYPE_ARGS,                                                             \
         cudaSurfaceBoundaryMode boundaryMode)                                                    \
@@ -1324,20 +1322,20 @@ SLANG_SURFACE_READ_HALF_CONVERT(surf3Dread, (int x, int y, int z), (x, y, z))
 // it.
 
 template<typename T>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf1Dwrite_convert(
+SLANG_CUDA_CALL void surf1Dwrite_convert(
     T,
     cudaSurfaceObject_t surfObj,
     int x,
     cudaSurfaceBoundaryMode boundaryMode);
 template<typename T>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf2Dwrite_convert(
+SLANG_CUDA_CALL void surf2Dwrite_convert(
     T,
     cudaSurfaceObject_t surfObj,
     int x,
     int y,
     cudaSurfaceBoundaryMode boundaryMode);
 template<typename T>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf3Dwrite_convert(
+SLANG_CUDA_CALL void surf3Dwrite_convert(
     T,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1351,7 +1349,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf3Dwrite_convert(
 // Float
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf1Dwrite_convert<float>(
+SLANG_CUDA_CALL void surf1Dwrite_convert<float>(
     float v,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1364,7 +1362,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf1Dwrite_convert<float>(
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf2Dwrite_convert<float>(
+SLANG_CUDA_CALL void surf2Dwrite_convert<float>(
     float v,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1379,7 +1377,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf2Dwrite_convert<float>(
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf3Dwrite_convert<float>(
+SLANG_CUDA_CALL void surf3Dwrite_convert<float>(
     float v,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1399,7 +1397,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf3Dwrite_convert<float>(
 // Float2
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf1Dwrite_convert<float2>(
+SLANG_CUDA_CALL void surf1Dwrite_convert<float2>(
     float2 v,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1414,7 +1412,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf1Dwrite_convert<float2>(
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf2Dwrite_convert<float2>(
+SLANG_CUDA_CALL void surf2Dwrite_convert<float2>(
     float2 v,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1431,7 +1429,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf2Dwrite_convert<float2>(
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf3Dwrite_convert<float2>(
+SLANG_CUDA_CALL void surf3Dwrite_convert<float2>(
     float2 v,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1453,7 +1451,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf3Dwrite_convert<float2>(
 
 // Float4
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf1Dwrite_convert<float4>(
+SLANG_CUDA_CALL void surf1Dwrite_convert<float4>(
     float4 v,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1471,7 +1469,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf1Dwrite_convert<float4>(
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf2Dwrite_convert<float4>(
+SLANG_CUDA_CALL void surf2Dwrite_convert<float4>(
     float4 v,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1491,7 +1489,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf2Dwrite_convert<float4>(
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf3Dwrite_convert<float4>(
+SLANG_CUDA_CALL void surf3Dwrite_convert<float4>(
     float4 v,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1514,7 +1512,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf3Dwrite_convert<float4>(
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf2Dwrite_convert<uint>(
+SLANG_CUDA_CALL void surf2Dwrite_convert<uint>(
     uint v,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1528,7 +1526,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf2Dwrite_convert<uint>(
         "r"(v));
 }
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf3Dwrite_convert<uint>(
+SLANG_CUDA_CALL void surf3Dwrite_convert<uint>(
     uint v,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1546,7 +1544,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf3Dwrite_convert<uint>(
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf2Dwrite_convert<uint2>(
+SLANG_CUDA_CALL void surf2Dwrite_convert<uint2>(
     uint2 v,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1562,7 +1560,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf2Dwrite_convert<uint2>(
         "r"(vy));
 }
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf3Dwrite_convert<uint2>(
+SLANG_CUDA_CALL void surf3Dwrite_convert<uint2>(
     uint2 v,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1583,7 +1581,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf3Dwrite_convert<uint2>(
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf2Dwrite_convert<uint4>(
+SLANG_CUDA_CALL void surf2Dwrite_convert<uint4>(
     uint4 v,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1602,7 +1600,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf2Dwrite_convert<uint4>(
         "r"(vw));
 }
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf3Dwrite_convert<uint4>(
+SLANG_CUDA_CALL void surf3Dwrite_convert<uint4>(
     uint4 v,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1625,7 +1623,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf3Dwrite_convert<uint4>(
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf2Dwrite_convert<int>(
+SLANG_CUDA_CALL void surf2Dwrite_convert<int>(
     int v,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1640,7 +1638,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf2Dwrite_convert<int>(
 }
 // Int2
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf2Dwrite_convert<int2>(
+SLANG_CUDA_CALL void surf2Dwrite_convert<int2>(
     int2 v,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1656,7 +1654,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf2Dwrite_convert<int2>(
         "r"(vy));
 }
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf2Dwrite_convert<int4>(
+SLANG_CUDA_CALL void surf2Dwrite_convert<int4>(
     int4 v,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1676,7 +1674,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf2Dwrite_convert<int4>(
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf3Dwrite_convert<int>(
+SLANG_CUDA_CALL void surf3Dwrite_convert<int>(
     int v,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1694,7 +1692,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf3Dwrite_convert<int>(
 }
 // Int2
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf3Dwrite_convert<int2>(
+SLANG_CUDA_CALL void surf3Dwrite_convert<int2>(
     int2 v,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1715,7 +1713,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf3Dwrite_convert<int2>(
 }
 // Int4
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf3Dwrite_convert<int4>(
+SLANG_CUDA_CALL void surf3Dwrite_convert<int4>(
     int4 v,
     cudaSurfaceObject_t surfObj,
     int x,
@@ -1740,171 +1738,171 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void surf3Dwrite_convert<int4>(
 // ----------------------------- F32 -----------------------------------------
 
 // Unary
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_ceil(float f)
+SLANG_CUDA_CALL float F32_ceil(float f)
 {
     return ::ceilf(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_floor(float f)
+SLANG_CUDA_CALL float F32_floor(float f)
 {
     return ::floorf(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_round(float f)
+SLANG_CUDA_CALL float F32_round(float f)
 {
     return ::roundf(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_sin(float f)
+SLANG_CUDA_CALL float F32_sin(float f)
 {
     return ::sinf(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_cos(float f)
+SLANG_CUDA_CALL float F32_cos(float f)
 {
     return ::cosf(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void F32_sincos(float f, float* s, float* c)
+SLANG_CUDA_CALL void F32_sincos(float f, float* s, float* c)
 {
     ::sincosf(f, s, c);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_tan(float f)
+SLANG_CUDA_CALL float F32_tan(float f)
 {
     return ::tanf(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_asin(float f)
+SLANG_CUDA_CALL float F32_asin(float f)
 {
     return ::asinf(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_acos(float f)
+SLANG_CUDA_CALL float F32_acos(float f)
 {
     return ::acosf(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_atan(float f)
+SLANG_CUDA_CALL float F32_atan(float f)
 {
     return ::atanf(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_sinh(float f)
+SLANG_CUDA_CALL float F32_sinh(float f)
 {
     return ::sinhf(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_cosh(float f)
+SLANG_CUDA_CALL float F32_cosh(float f)
 {
     return ::coshf(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_tanh(float f)
+SLANG_CUDA_CALL float F32_tanh(float f)
 {
     return ::tanhf(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_asinh(float f)
+SLANG_CUDA_CALL float F32_asinh(float f)
 {
     return ::asinhf(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_acosh(float f)
+SLANG_CUDA_CALL float F32_acosh(float f)
 {
     return ::acoshf(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_atanh(float f)
+SLANG_CUDA_CALL float F32_atanh(float f)
 {
     return ::atanhf(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_log2(float f)
+SLANG_CUDA_CALL float F32_log2(float f)
 {
     return ::log2f(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_log(float f)
+SLANG_CUDA_CALL float F32_log(float f)
 {
     return ::logf(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_log10(float f)
+SLANG_CUDA_CALL float F32_log10(float f)
 {
     return ::log10f(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_exp2(float f)
+SLANG_CUDA_CALL float F32_exp2(float f)
 {
     return ::exp2f(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_exp(float f)
+SLANG_CUDA_CALL float F32_exp(float f)
 {
     return ::expf(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_abs(float f)
+SLANG_CUDA_CALL float F32_abs(float f)
 {
     return ::fabsf(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_trunc(float f)
+SLANG_CUDA_CALL float F32_trunc(float f)
 {
     return ::truncf(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_sqrt(float f)
+SLANG_CUDA_CALL float F32_sqrt(float f)
 {
     return ::sqrtf(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_rsqrt(float f)
+SLANG_CUDA_CALL float F32_rsqrt(float f)
 {
     return ::rsqrtf(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_sign(float f)
+SLANG_CUDA_CALL float F32_sign(float f)
 {
     return (f == 0.0f) ? f : ((f < 0.0f) ? -1.0f : 1.0f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_frac(float f)
+SLANG_CUDA_CALL float F32_frac(float f)
 {
     return f - F32_floor(f);
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL bool F32_isnan(float f)
+SLANG_CUDA_CALL bool F32_isnan(float f)
 {
     return isnan(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL bool F32_isfinite(float f)
+SLANG_CUDA_CALL bool F32_isfinite(float f)
 {
     return isfinite(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL bool F32_isinf(float f)
+SLANG_CUDA_CALL bool F32_isinf(float f)
 {
     return isinf(f);
 }
 
 // Binary
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_min(float a, float b)
+SLANG_CUDA_CALL float F32_min(float a, float b)
 {
     return ::fminf(a, b);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_max(float a, float b)
+SLANG_CUDA_CALL float F32_max(float a, float b)
 {
     return ::fmaxf(a, b);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_pow(float a, float b)
+SLANG_CUDA_CALL float F32_pow(float a, float b)
 {
     return ::powf(a, b);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_fmod(float a, float b)
+SLANG_CUDA_CALL float F32_fmod(float a, float b)
 {
     return ::fmodf(a, b);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_remainder(float a, float b)
+SLANG_CUDA_CALL float F32_remainder(float a, float b)
 {
     return ::remainderf(a, b);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_atan2(float a, float b)
+SLANG_CUDA_CALL float F32_atan2(float a, float b)
 {
     return float(::atan2(a, b));
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_frexp(float x, int* e)
+SLANG_CUDA_CALL float F32_frexp(float x, int* e)
 {
     return frexpf(x, e);
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_modf(float x, float* ip)
+SLANG_CUDA_CALL float F32_modf(float x, float* ip)
 {
     return ::modff(x, ip);
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t F32_asuint(float f)
+SLANG_CUDA_CALL uint32_t F32_asuint(float f)
 {
     Union32 u;
     u.f = f;
     return u.u;
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL int32_t F32_asint(float f)
+SLANG_CUDA_CALL int32_t F32_asint(float f)
 {
     Union32 u;
     u.f = f;
@@ -1912,7 +1910,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL int32_t F32_asint(float f)
 }
 
 // Ternary
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_fma(float a, float b, float c)
+SLANG_CUDA_CALL float F32_fma(float a, float b, float c)
 {
     return ::fmaf(a, b, c);
 }
@@ -1921,153 +1919,153 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL float F32_fma(float a, float b, float c)
 // ----------------------------- F64 -----------------------------------------
 
 // Unary
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_ceil(double f)
+SLANG_CUDA_CALL double F64_ceil(double f)
 {
     return ::ceil(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_floor(double f)
+SLANG_CUDA_CALL double F64_floor(double f)
 {
     return ::floor(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_round(double f)
+SLANG_CUDA_CALL double F64_round(double f)
 {
     return ::round(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_sin(double f)
+SLANG_CUDA_CALL double F64_sin(double f)
 {
     return ::sin(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_cos(double f)
+SLANG_CUDA_CALL double F64_cos(double f)
 {
     return ::cos(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void F64_sincos(double f, double* s, double* c)
+SLANG_CUDA_CALL void F64_sincos(double f, double* s, double* c)
 {
     ::sincos(f, s, c);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_tan(double f)
+SLANG_CUDA_CALL double F64_tan(double f)
 {
     return ::tan(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_asin(double f)
+SLANG_CUDA_CALL double F64_asin(double f)
 {
     return ::asin(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_acos(double f)
+SLANG_CUDA_CALL double F64_acos(double f)
 {
     return ::acos(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_atan(double f)
+SLANG_CUDA_CALL double F64_atan(double f)
 {
     return ::atan(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_sinh(double f)
+SLANG_CUDA_CALL double F64_sinh(double f)
 {
     return ::sinh(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_cosh(double f)
+SLANG_CUDA_CALL double F64_cosh(double f)
 {
     return ::cosh(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_tanh(double f)
+SLANG_CUDA_CALL double F64_tanh(double f)
 {
     return ::tanh(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_log2(double f)
+SLANG_CUDA_CALL double F64_log2(double f)
 {
     return ::log2(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_log(double f)
+SLANG_CUDA_CALL double F64_log(double f)
 {
     return ::log(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_log10(float f)
+SLANG_CUDA_CALL double F64_log10(float f)
 {
     return ::log10(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_exp2(double f)
+SLANG_CUDA_CALL double F64_exp2(double f)
 {
     return ::exp2(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_exp(double f)
+SLANG_CUDA_CALL double F64_exp(double f)
 {
     return ::exp(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_abs(double f)
+SLANG_CUDA_CALL double F64_abs(double f)
 {
     return ::fabs(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_trunc(double f)
+SLANG_CUDA_CALL double F64_trunc(double f)
 {
     return ::trunc(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_sqrt(double f)
+SLANG_CUDA_CALL double F64_sqrt(double f)
 {
     return ::sqrt(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_rsqrt(double f)
+SLANG_CUDA_CALL double F64_rsqrt(double f)
 {
     return ::rsqrt(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_sign(double f)
+SLANG_CUDA_CALL double F64_sign(double f)
 {
     return (f == 0.0) ? f : ((f < 0.0) ? -1.0 : 1.0);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_frac(double f)
+SLANG_CUDA_CALL double F64_frac(double f)
 {
     return f - F64_floor(f);
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL bool F64_isnan(double f)
+SLANG_CUDA_CALL bool F64_isnan(double f)
 {
     return isnan(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL bool F64_isfinite(double f)
+SLANG_CUDA_CALL bool F64_isfinite(double f)
 {
     return isfinite(f);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL bool F64_isinf(double f)
+SLANG_CUDA_CALL bool F64_isinf(double f)
 {
     return isinf(f);
 }
 
 // Binary
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_min(double a, double b)
+SLANG_CUDA_CALL double F64_min(double a, double b)
 {
     return ::fmin(a, b);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_max(double a, double b)
+SLANG_CUDA_CALL double F64_max(double a, double b)
 {
     return ::fmax(a, b);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_pow(double a, double b)
+SLANG_CUDA_CALL double F64_pow(double a, double b)
 {
     return ::pow(a, b);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_fmod(double a, double b)
+SLANG_CUDA_CALL double F64_fmod(double a, double b)
 {
     return ::fmod(a, b);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_remainder(double a, double b)
+SLANG_CUDA_CALL double F64_remainder(double a, double b)
 {
     return ::remainder(a, b);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_atan2(double a, double b)
+SLANG_CUDA_CALL double F64_atan2(double a, double b)
 {
     return ::atan2(a, b);
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_frexp(double x, int* e)
+SLANG_CUDA_CALL double F64_frexp(double x, int* e)
 {
     return ::frexp(x, e);
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_modf(double x, double* ip)
+SLANG_CUDA_CALL double F64_modf(double x, double* ip)
 {
     return ::modf(x, ip);
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void F64_asuint(double d, uint32_t* low, uint32_t* hi)
+SLANG_CUDA_CALL void F64_asuint(double d, uint32_t* low, uint32_t* hi)
 {
     Union64 u;
     u.d = d;
@@ -2075,7 +2073,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void F64_asuint(double d, uint32_t* low, uint
     *hi = uint32_t(u.u >> 32);
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL void F64_asint(double d, int32_t* low, int32_t* hi)
+SLANG_CUDA_CALL void F64_asint(double d, int32_t* low, int32_t* hi)
 {
     Union64 u;
     u.d = d;
@@ -2084,14 +2082,14 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL void F64_asint(double d, int32_t* low, int32_
 }
 
 // Ternary
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double F64_fma(double a, double b, double c)
+SLANG_CUDA_CALL double F64_fma(double a, double b, double c)
 {
     return ::fma(a, b, c);
 }
 
 // ----------------------------- U8 -----------------------------------------
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t U8_countbits(uint8_t v)
+SLANG_CUDA_CALL uint32_t U8_countbits(uint8_t v)
 {
     // No native 8bit popc yet, just cast and use 32bit variant
     return __popc(uint32_t(v));
@@ -2099,14 +2097,14 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t U8_countbits(uint8_t v)
 
 // ----------------------------- I8 -----------------------------------------
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t I8_countbits(int8_t v)
+SLANG_CUDA_CALL uint32_t I8_countbits(int8_t v)
 {
     return U8_countbits(uint8_t(v));
 }
 
 // ----------------------------- U16 -----------------------------------------
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t U16_countbits(uint16_t v)
+SLANG_CUDA_CALL uint32_t U16_countbits(uint16_t v)
 {
     // No native 16bit popc yet, just cast and use 32bit variant
     return __popc(uint32_t(v));
@@ -2114,7 +2112,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t U16_countbits(uint16_t v)
 
 // ----------------------------- I16 -----------------------------------------
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t I16_countbits(int16_t v)
+SLANG_CUDA_CALL uint32_t I16_countbits(int16_t v)
 {
     return U16_countbits(uint16_t(v));
 }
@@ -2122,52 +2120,52 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t I16_countbits(int16_t v)
 // ----------------------------- U32 -----------------------------------------
 
 // Unary
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t U32_abs(uint32_t f)
+SLANG_CUDA_CALL uint32_t U32_abs(uint32_t f)
 {
     return f;
 }
 
 // Binary
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t U32_min(uint32_t a, uint32_t b)
+SLANG_CUDA_CALL uint32_t U32_min(uint32_t a, uint32_t b)
 {
     return a < b ? a : b;
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t U32_max(uint32_t a, uint32_t b)
+SLANG_CUDA_CALL uint32_t U32_max(uint32_t a, uint32_t b)
 {
     return a > b ? a : b;
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float U32_asfloat(uint32_t x)
+SLANG_CUDA_CALL float U32_asfloat(uint32_t x)
 {
     Union32 u;
     u.u = x;
     return u.f;
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t U32_asint(int32_t x)
+SLANG_CUDA_CALL uint32_t U32_asint(int32_t x)
 {
     return uint32_t(x);
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double U32_asdouble(uint32_t low, uint32_t hi)
+SLANG_CUDA_CALL double U32_asdouble(uint32_t low, uint32_t hi)
 {
     Union64 u;
     u.u = (uint64_t(hi) << 32) | low;
     return u.d;
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t U32_countbits(uint32_t v)
+SLANG_CUDA_CALL uint32_t U32_countbits(uint32_t v)
 {
     return __popc(v);
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t U32_firstbitlow(uint32_t v)
+SLANG_CUDA_CALL uint32_t U32_firstbitlow(uint32_t v)
 {
     // __ffs returns 1-based bit position or 0 if no bits set
     // firstbitlow should return 0-based bit position or ~0u if no bits set
     return v == 0 ? ~0u : (__ffs(v) - 1);
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t U32_firstbithigh(uint32_t v)
+SLANG_CUDA_CALL uint32_t U32_firstbithigh(uint32_t v)
 {
     // maps to hlsl firstbithigh
     if ((int32_t)v < 0)
@@ -2180,125 +2178,125 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t U32_firstbithigh(uint32_t v)
 // ----------------------------- I32 -----------------------------------------
 
 // Unary
-SLANG_FORCE_INLINE SLANG_CUDA_CALL int32_t I32_abs(int32_t f)
+SLANG_CUDA_CALL int32_t I32_abs(int32_t f)
 {
     return (f < 0) ? -f : f;
 }
 
 // Binary
-SLANG_FORCE_INLINE SLANG_CUDA_CALL int32_t I32_min(int32_t a, int32_t b)
+SLANG_CUDA_CALL int32_t I32_min(int32_t a, int32_t b)
 {
     return a < b ? a : b;
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL int32_t I32_max(int32_t a, int32_t b)
+SLANG_CUDA_CALL int32_t I32_max(int32_t a, int32_t b)
 {
     return a > b ? a : b;
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float I32_asfloat(int32_t x)
+SLANG_CUDA_CALL float I32_asfloat(int32_t x)
 {
     Union32 u;
     u.i = x;
     return u.f;
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t I32_asuint(int32_t x)
+SLANG_CUDA_CALL uint32_t I32_asuint(int32_t x)
 {
     return uint32_t(x);
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL double I32_asdouble(int32_t low, int32_t hi)
+SLANG_CUDA_CALL double I32_asdouble(int32_t low, int32_t hi)
 {
     Union64 u;
     u.u = (uint64_t(hi) << 32) | uint32_t(low);
     return u.d;
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t I32_countbits(int32_t v)
+SLANG_CUDA_CALL uint32_t I32_countbits(int32_t v)
 {
     return U32_countbits(uint32_t(v));
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t I32_firstbitlow(int32_t v)
+SLANG_CUDA_CALL uint32_t I32_firstbitlow(int32_t v)
 {
     return U32_firstbitlow(uint32_t(v));
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t I32_firstbithigh(int32_t v)
+SLANG_CUDA_CALL uint32_t I32_firstbithigh(int32_t v)
 {
     return U32_firstbithigh(uint32_t(v));
 }
 
 // ----------------------------- U64 -----------------------------------------
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL int64_t U64_abs(uint64_t f)
+SLANG_CUDA_CALL int64_t U64_abs(uint64_t f)
 {
     return f;
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL int64_t U64_min(uint64_t a, uint64_t b)
+SLANG_CUDA_CALL int64_t U64_min(uint64_t a, uint64_t b)
 {
     return a < b ? a : b;
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL int64_t U64_max(uint64_t a, uint64_t b)
+SLANG_CUDA_CALL int64_t U64_max(uint64_t a, uint64_t b)
 {
     return a > b ? a : b;
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t U64_countbits(uint64_t v)
+SLANG_CUDA_CALL uint32_t U64_countbits(uint64_t v)
 {
     return __popcll(v);
 }
 
 // ----------------------------- I64 -----------------------------------------
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL int64_t I64_abs(int64_t f)
+SLANG_CUDA_CALL int64_t I64_abs(int64_t f)
 {
     return (f < 0) ? -f : f;
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL int64_t I64_min(int64_t a, int64_t b)
+SLANG_CUDA_CALL int64_t I64_min(int64_t a, int64_t b)
 {
     return a < b ? a : b;
 }
-SLANG_FORCE_INLINE SLANG_CUDA_CALL int64_t I64_max(int64_t a, int64_t b)
+SLANG_CUDA_CALL int64_t I64_max(int64_t a, int64_t b)
 {
     return a > b ? a : b;
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint32_t I64_countbits(int64_t v)
+SLANG_CUDA_CALL uint32_t I64_countbits(int64_t v)
 {
     return U64_countbits(uint64_t(v));
 }
 
 // ----------------------------- IPTR -----------------------------------------
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL intptr_t IPTR_abs(intptr_t f)
+SLANG_CUDA_CALL intptr_t IPTR_abs(intptr_t f)
 {
     return (f < 0) ? -f : f;
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL intptr_t IPTR_min(intptr_t a, intptr_t b)
+SLANG_CUDA_CALL intptr_t IPTR_min(intptr_t a, intptr_t b)
 {
     return a < b ? a : b;
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL intptr_t IPTR_max(intptr_t a, intptr_t b)
+SLANG_CUDA_CALL intptr_t IPTR_max(intptr_t a, intptr_t b)
 {
     return a > b ? a : b;
 }
 
 // ----------------------------- UPTR -----------------------------------------
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uintptr_t UPTR_abs(uintptr_t f)
+SLANG_CUDA_CALL uintptr_t UPTR_abs(uintptr_t f)
 {
     return f;
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uintptr_t UPTR_min(uintptr_t a, uintptr_t b)
+SLANG_CUDA_CALL uintptr_t UPTR_min(uintptr_t a, uintptr_t b)
 {
     return a < b ? a : b;
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uintptr_t UPTR_max(uintptr_t a, uintptr_t b)
+SLANG_CUDA_CALL uintptr_t UPTR_max(uintptr_t a, uintptr_t b)
 {
     return a > b ? a : b;
 }
@@ -4099,29 +4097,29 @@ struct TensorView
 // 1D is not supported via PTX. Keeping this placeholder in case it ever gets
 // supported.
 template<typename T>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL T tex1Dfetch_int(CUtexObject texObj, int x)
+SLANG_CUDA_CALL T tex1Dfetch_int(CUtexObject texObj, int x)
 {
-    T result;
+    float result;
     float stub;
     asm("tex.1d.v4.f32.s32 {%0, %1, %2, %3}, [%4, {%5}];"
         : "=f"(result), "=f"(stub), "=f"(stub), "=f"(stub)
         : "l"(texObj), "r"(x));
-    return result;
+    return T(result);
 }
 
 template<typename T>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL T tex2Dfetch_int(CUtexObject texObj, int x, int y)
+SLANG_CUDA_CALL T tex2Dfetch_int(CUtexObject texObj, int x, int y)
 {
-    T result;
+    float result;
     float stub;
     asm("tex.2d.v4.f32.s32 {%0, %1, %2, %3}, [%4, {%5, %6}];"
         : "=f"(result), "=f"(stub), "=f"(stub), "=f"(stub)
         : "l"(texObj), "r"(x), "r"(y));
-    return result;
+    return T(result);
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float2 tex2Dfetch_int(CUtexObject texObj, int x, int y)
+SLANG_CUDA_CALL float2 tex2Dfetch_int(CUtexObject texObj, int x, int y)
 {
     float result_x, result_y;
     float stub;
@@ -4132,7 +4130,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL float2 tex2Dfetch_int(CUtexObject texObj, int
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float4 tex2Dfetch_int(CUtexObject texObj, int x, int y)
+SLANG_CUDA_CALL float4 tex2Dfetch_int(CUtexObject texObj, int x, int y)
 {
     float result_x, result_y, result_z, result_w;
     asm("tex.2d.v4.f32.s32 {%0, %1, %2, %3}, [%4, {%5, %6}];"
@@ -4142,7 +4140,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL float4 tex2Dfetch_int(CUtexObject texObj, int
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint tex2Dfetch_int(CUtexObject texObj, int x, int y)
+SLANG_CUDA_CALL uint tex2Dfetch_int(CUtexObject texObj, int x, int y)
 {
     uint result;
     uint stub;
@@ -4153,7 +4151,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL uint tex2Dfetch_int(CUtexObject texObj, int x
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint2 tex2Dfetch_int(CUtexObject texObj, int x, int y)
+SLANG_CUDA_CALL uint2 tex2Dfetch_int(CUtexObject texObj, int x, int y)
 {
     uint result_x, result_y;
     uint stub;
@@ -4164,7 +4162,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL uint2 tex2Dfetch_int(CUtexObject texObj, int 
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint4 tex2Dfetch_int(CUtexObject texObj, int x, int y)
+SLANG_CUDA_CALL uint4 tex2Dfetch_int(CUtexObject texObj, int x, int y)
 {
     uint result_x, result_y, result_z, result_w;
     asm("tex.2d.v4.f32.s32 {%0, %1, %2, %3}, [%4, {%5, %6}];"
@@ -4174,7 +4172,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL uint4 tex2Dfetch_int(CUtexObject texObj, int 
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL int tex2Dfetch_int(CUtexObject texObj, int x, int y)
+SLANG_CUDA_CALL int tex2Dfetch_int(CUtexObject texObj, int x, int y)
 {
     int result;
     int stub;
@@ -4185,7 +4183,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL int tex2Dfetch_int(CUtexObject texObj, int x,
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL int2 tex2Dfetch_int(CUtexObject texObj, int x, int y)
+SLANG_CUDA_CALL int2 tex2Dfetch_int(CUtexObject texObj, int x, int y)
 {
     int result_x, result_y;
     int stub;
@@ -4196,7 +4194,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL int2 tex2Dfetch_int(CUtexObject texObj, int x
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL int4 tex2Dfetch_int(CUtexObject texObj, int x, int y)
+SLANG_CUDA_CALL int4 tex2Dfetch_int(CUtexObject texObj, int x, int y)
 {
     int result_x, result_y, result_z, result_w;
     asm("tex.2d.v4.f32.s32 {%0, %1, %2, %3}, [%4, {%5, %6}];"
@@ -4206,9 +4204,9 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL int4 tex2Dfetch_int(CUtexObject texObj, int x
 }
 
 template<typename T>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL T tex3Dfetch_int(CUtexObject texObj, int x, int y, int z)
+SLANG_CUDA_CALL T tex3Dfetch_int(CUtexObject texObj, int x, int y, int z)
 {
-    T result;
+    float result;
     float stub;
     asm("tex.3d.v4.f32.s32 {%0, %1, %2, %3}, [%4, {%5, %6, %7, %8}];"
         : "=f"(result), "=f"(stub), "=f"(stub), "=f"(stub)
@@ -4218,11 +4216,11 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL T tex3Dfetch_int(CUtexObject texObj, int x, i
     // https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#texture-instructions-tex
     // Operand c is a scalar or singleton tuple for 1d textures; is a two-element vector for 2d
     // textures; and is a four-element vector for 3d textures.
-    return result;
+    return T(result);
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float2 tex3Dfetch_int(CUtexObject texObj, int x, int y, int z)
+SLANG_CUDA_CALL float2 tex3Dfetch_int(CUtexObject texObj, int x, int y, int z)
 {
     float result_x, result_y;
     float stub;
@@ -4233,7 +4231,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL float2 tex3Dfetch_int(CUtexObject texObj, int
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float4 tex3Dfetch_int(CUtexObject texObj, int x, int y, int z)
+SLANG_CUDA_CALL float4 tex3Dfetch_int(CUtexObject texObj, int x, int y, int z)
 {
     float result_x, result_y, result_z, result_w;
     asm("tex.3d.v4.f32.s32 {%0, %1, %2, %3}, [%4, {%5, %6, %7, %8}];"
@@ -4243,7 +4241,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL float4 tex3Dfetch_int(CUtexObject texObj, int
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint tex3Dfetch_int(CUtexObject texObj, int x, int y, int z)
+SLANG_CUDA_CALL uint tex3Dfetch_int(CUtexObject texObj, int x, int y, int z)
 {
     uint result;
     uint stub;
@@ -4254,7 +4252,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL uint tex3Dfetch_int(CUtexObject texObj, int x
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint2 tex3Dfetch_int(CUtexObject texObj, int x, int y, int z)
+SLANG_CUDA_CALL uint2 tex3Dfetch_int(CUtexObject texObj, int x, int y, int z)
 {
     uint result_x, result_y;
     uint stub;
@@ -4265,7 +4263,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL uint2 tex3Dfetch_int(CUtexObject texObj, int 
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint4 tex3Dfetch_int(CUtexObject texObj, int x, int y, int z)
+SLANG_CUDA_CALL uint4 tex3Dfetch_int(CUtexObject texObj, int x, int y, int z)
 {
     uint result_x, result_y, result_z, result_w;
     asm("tex.3d.v4.f32.s32 {%0, %1, %2, %3}, [%4, {%5, %6, %7, %8}];"
@@ -4275,7 +4273,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL uint4 tex3Dfetch_int(CUtexObject texObj, int 
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL int tex3Dfetch_int(CUtexObject texObj, int x, int y, int z)
+SLANG_CUDA_CALL int tex3Dfetch_int(CUtexObject texObj, int x, int y, int z)
 {
     int result;
     int stub;
@@ -4286,7 +4284,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL int tex3Dfetch_int(CUtexObject texObj, int x,
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL int2 tex3Dfetch_int(CUtexObject texObj, int x, int y, int z)
+SLANG_CUDA_CALL int2 tex3Dfetch_int(CUtexObject texObj, int x, int y, int z)
 {
     int result_x, result_y;
     int stub;
@@ -4297,7 +4295,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL int2 tex3Dfetch_int(CUtexObject texObj, int x
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL int4 tex3Dfetch_int(CUtexObject texObj, int x, int y, int z)
+SLANG_CUDA_CALL int4 tex3Dfetch_int(CUtexObject texObj, int x, int y, int z)
 {
     int result_x, result_y, result_z, result_w;
     asm("tex.3d.v4.f32.s32 {%0, %1, %2, %3}, [%4, {%5, %6, %7, %8}];"
@@ -4307,30 +4305,30 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL int4 tex3Dfetch_int(CUtexObject texObj, int x
 }
 
 template<typename T>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL T tex1DArrayfetch_int(CUtexObject texObj, int x, int layer)
+SLANG_CUDA_CALL T tex1DArrayfetch_int(CUtexObject texObj, int x, int layer)
 {
-    T result;
+    float result;
     float stub;
     asm("tex.a1d.v4.f32.s32 {%0, %1, %2, %3}, [%4, {%5, %6}];"
         : "=f"(result), "=f"(stub), "=f"(stub), "=f"(stub)
         : "l"(texObj), "r"(x), "r"(layer));
-    return result;
+    return T(result);
 }
 
 template<typename T>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL T
+SLANG_CUDA_CALL T
 tex2DArrayfetch_int(CUtexObject texObj, int x, int y, int layer)
 {
-    T result;
+    float result;
     float stub;
     asm("tex.a2d.v4.f32.s32 {%0, %1, %2, %3}, [%4, {%5, %6, %7, %8}];"
         : "=f"(result), "=f"(stub), "=f"(stub), "=f"(stub)
         : "l"(texObj), "r"(x), "r"(y), "r"(layer), "r"(layer));
-    return result;
+    return T(result);
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float2
+SLANG_CUDA_CALL float2
 tex2DArrayfetch_int(CUtexObject texObj, int x, int y, int layer)
 {
     float result_x, result_y;
@@ -4342,7 +4340,7 @@ tex2DArrayfetch_int(CUtexObject texObj, int x, int y, int layer)
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL float4
+SLANG_CUDA_CALL float4
 tex2DArrayfetch_int(CUtexObject texObj, int x, int y, int layer)
 {
     float result_x, result_y, result_z, result_w;
@@ -4353,7 +4351,7 @@ tex2DArrayfetch_int(CUtexObject texObj, int x, int y, int layer)
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint
+SLANG_CUDA_CALL uint
 tex2DArrayfetch_int(CUtexObject texObj, int x, int y, int layer)
 {
     uint result;
@@ -4365,7 +4363,7 @@ tex2DArrayfetch_int(CUtexObject texObj, int x, int y, int layer)
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint2
+SLANG_CUDA_CALL uint2
 tex2DArrayfetch_int(CUtexObject texObj, int x, int y, int layer)
 {
     uint result_x, result_y;
@@ -4377,7 +4375,7 @@ tex2DArrayfetch_int(CUtexObject texObj, int x, int y, int layer)
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uint4
+SLANG_CUDA_CALL uint4
 tex2DArrayfetch_int(CUtexObject texObj, int x, int y, int layer)
 {
     uint result_x, result_y, result_z, result_w;
@@ -4388,7 +4386,7 @@ tex2DArrayfetch_int(CUtexObject texObj, int x, int y, int layer)
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL int tex2DArrayfetch_int(
+SLANG_CUDA_CALL int tex2DArrayfetch_int(
     CUtexObject texObj,
     int x,
     int y,
@@ -4403,7 +4401,7 @@ SLANG_FORCE_INLINE SLANG_CUDA_CALL int tex2DArrayfetch_int(
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL int2
+SLANG_CUDA_CALL int2
 tex2DArrayfetch_int(CUtexObject texObj, int x, int y, int layer)
 {
     int result_x, result_y;
@@ -4415,7 +4413,7 @@ tex2DArrayfetch_int(CUtexObject texObj, int x, int y, int layer)
 }
 
 template<>
-SLANG_FORCE_INLINE SLANG_CUDA_CALL int4
+SLANG_CUDA_CALL int4
 tex2DArrayfetch_int(CUtexObject texObj, int x, int y, int layer)
 {
     int result_x, result_y, result_z, result_w;

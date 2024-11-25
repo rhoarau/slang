@@ -308,9 +308,17 @@ void CUDASourceEmitter::emitFunctionPreambleImpl(IRInst* inst)
 {
     if (!inst)
         return;
-    if (inst->findDecoration<IREntryPointDecoration>())
+
+    auto* entryPointDecoration = inst->findDecoration<IREntryPointDecoration>();
+    if (entryPointDecoration)
     {
-        m_writer->emit("extern \"C\" __global__ ");
+        auto stage = entryPointDecoration->getProfile().getStage();
+        if (stage == Stage::Callable) {
+            m_writer->emit("extern \"C\" __device__ ");
+        }
+        else {
+            m_writer->emit("extern \"C\" __global__ ");
+        }
         return;
     }
 
@@ -320,11 +328,11 @@ void CUDASourceEmitter::emitFunctionPreambleImpl(IRInst* inst)
     }
     else if (inst->findDecoration<IRCudaHostDecoration>())
     {
-        m_writer->emit("__host__ ");
+        m_writer->emit("inline __host__ ");
     }
     else
     {
-        m_writer->emit("__device__ ");
+        m_writer->emit("inline __device__ ");
     }
 }
 

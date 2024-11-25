@@ -12,7 +12,7 @@ void CallShader<T>(uint pShaderIndex, inout T pParamaters)
     __target_switch
     {
     case cuda:
-        __intrinsic_asm "optixDirectCall<void>($0, $1)";
+        __intrinsic_asm "optixContinuationCall<void>($0, $1)";
     default:
         ::CallShader(pShaderIndex, pParamaters);
     }

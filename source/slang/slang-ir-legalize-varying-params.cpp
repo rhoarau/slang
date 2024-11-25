@@ -554,18 +554,8 @@ protected:
         processMutableParam(param, inOutType);
     }
 
-    void processMutableParam(IRParam* param, IROutTypeBase* paramPtrType)
+    virtual void processMutableParam(IRParam* param, IROutTypeBase* paramPtrType)
     {
-        //////////////////////////////////////////////////////////////////////////////////
-        // TODO RHO: we need a better way to inhibit this param process for CUDA callable entry points
-
-        // bool isCUDAEntryPointVaryingParamLegalizeContext = dynamic_cast<CUDAEntryPointVaryingParamLegalizeContext*>(this) != nullptr;
-        // if (m_stage == Stage::Callable && isCUDAEntryPointVaryingParamLegalizeContext)
-        //     return;
-        if (m_stage == Stage::Callable)
-            return;
-        //////////////////////////////////////////////////////////////////////////////////
-
         // The default handling of any mutable (`out` or `inout`) parameter
         // will be to introduce a local variable of the corresponding
         // type and to use that in place of the actual parameter during
@@ -1160,6 +1150,84 @@ struct CUDAEntryPointVaryingParamLegalizeContext : EntryPointVaryingParamLegaliz
         }
 
         return nullptr;
+    }
+
+    // Inibit callable stage
+    // TODO RHO: we need a better way to inhibit this param process for CUDA callable entry points since it crash
+    void processMutableParam(IRParam* param, IROutTypeBase* paramPtrType) SLANG_OVERRIDE
+    {
+        //////////////////////////////////////////////////////////////////////////////////
+        if (m_stage == Stage::Callable)
+            return;
+        //////////////////////////////////////////////////////////////////////////////////
+
+        // The default handling of any mutable (`out` or `inout`) parameter
+        // will be to introduce a local variable of the corresponding
+        // type and to use that in place of the actual parameter during
+        // execution of the function.
+
+        // The replacement variable will have the type of the original
+        // parameter (the `T` in `Out<T>` or `InOut<T>`).
+        //
+        auto valueType = paramPtrType->getValueType();
+
+        // The replacement variable will be declared at the top of
+        // the function.
+        //
+        IRBuilder builder(m_module);
+        builder.setInsertBefore(m_firstOrdinaryInst);
+
+        auto localVar = builder.emitVar(valueType);
+        // Add TempCallArgVar decoration to mark this variable as a temporary for parameter passing
+        builder.addSimpleDecoration<IRTempCallArgVarDecoration>(localVar);
+        auto localVal = LegalizedVaryingVal::makeAddress(localVar);
+
+        if (const auto inOutType = as<IRInOutType>(paramPtrType))
+        {
+            // If the parameter was an `inout` and not just an `out`
+            // parameter, we will create one more more legal `in`
+            // parameters to represent the incoming value,
+            // and then assign from those legalized input(s)
+            // into our local variable at the start of the function.
+            //
+            auto inputVal =
+                createLegalVaryingVal(valueType, m_paramLayout, LayoutResourceKind::VaryingInput);
+            assign(builder, localVal, inputVal);
+        }
+
+        // Because the `out` or `inout` parameter is represented
+        // as a pointer, and our local variable is also a pointer
+        // we can directly replace all uses of the original parameter
+        // with uses of the variable.
+        //
+        param->replaceUsesWith(localVar);
+
+        // For both `out` and `inout` parameters, we need to
+        // introduce one or more legalized `out` parameters
+        // to represent the outgoing value.
+        //
+        auto outputVal =
+            createLegalVaryingVal(valueType, m_paramLayout, LayoutResourceKind::VaryingOutput);
+
+        // In order to have changes to our local variable become
+        // visible in the legalized outputs, we need to assign
+        // from the local variable to the output as the last
+        // operation before any `return` instructions.
+        //
+        for (auto block : m_entryPointFunc->getBlocks())
+        {
+            auto returnInst = as<IRReturn>(block->getTerminator());
+            if (!returnInst)
+                continue;
+
+            builder.setInsertBefore(returnInst);
+            assign(builder, outputVal, localVal);
+        }
+
+        // Once we are done replacing the original parameter,
+        // we can remove it from the function.
+        //
+        param->removeAndDeallocate();
     }
 
     void beginModuleImpl() SLANG_OVERRIDE
