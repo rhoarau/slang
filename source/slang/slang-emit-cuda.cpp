@@ -294,9 +294,17 @@ void CUDASourceEmitter::emitFunctionPreambleImpl(IRInst* inst)
 {
     if (!inst)
         return;
-    if (inst->findDecoration<IREntryPointDecoration>())
+
+    auto* entryPointDecoration = inst->findDecoration<IREntryPointDecoration>();
+    if (entryPointDecoration)
     {
-        m_writer->emit("extern \"C\" __global__ ");
+        auto stage = entryPointDecoration->getProfile().getStage();
+        if (stage == Stage::Callable) {
+            m_writer->emit("extern \"C\" __device__ ");
+        }
+        else {
+            m_writer->emit("extern \"C\" __global__ ");
+        }
         return;
     }
 
@@ -356,12 +364,12 @@ String CUDASourceEmitter::generateEntryPointNameImpl(IREntryPointDecoration* ent
         CASE(AnyHit, __anyhit__);
         CASE(ClosestHit, __closesthit__);
         CASE(Miss, __miss__);
-        CASE(Callable, __direct_callable__);
+        CASE(Callable, __continuation_callable__);
         //
         // There are two stages (or "program types") supported by OptiX
         // that Slang currently cannot target:
         //
-        // CASE(ContinuationCallable,   __continuation_callable__);
+        // CASE(ContinuationCallable,   __direct_callable__);
         // CASE(Exception,              __exception__);
         //
 #undef CASE
