@@ -554,7 +554,6 @@ protected:
     {
         //////////////////////////////////////////////////////////////////////////////////
         // TODO RHO: we need a better way to inhibit this param process for CUDA callable entry points
-
         // bool isCUDAEntryPointVaryingParamLegalizeContext = dynamic_cast<CUDAEntryPointVaryingParamLegalizeContext*>(this) != nullptr;
         // if (m_stage == Stage::Callable && isCUDAEntryPointVaryingParamLegalizeContext)
         //     return;
