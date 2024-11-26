@@ -883,6 +883,9 @@ SlangResult NVRTCDownstreamCompiler::_maybeAddOptixSupport(
     const DownstreamCompileOptions& options,
     CommandLine& ioCmdLine)
 {
+    // We need this argument to compile callables in ptx.
+    ioCmdLine.addArg("-rdc=true");
+
     // First check if we know if one of the include paths contains optix.h
     for (const auto& includePath : options.includePaths)
     {
@@ -915,9 +918,8 @@ SlangResult NVRTCDownstreamCompiler::_maybeAddOptixSupport(
     // Add the found include path
     ioCmdLine.addArg("-I");
     ioCmdLine.addArg(includePath);
-
     ioCmdLine.addArg("-DSLANG_CUDA_ENABLE_OPTIX");
-
+    
     return SLANG_OK;
 }
 
@@ -972,8 +974,8 @@ SlangResult NVRTCDownstreamCompiler::compile(
             break;
         }
     }
-    // Enable optimization as workaround for the following NVRTC error when we compile with debug info:
-    // "inlinable function call in a function with debug info must have a !dbg location"
+    // Enable optimization as workaround for the following NVRTC error when we compile with debug
+    // info: "inlinable function call in a function with debug info must have a !dbg location"
     cmdLine.addArg("--dopt=on");
 
     // Don't seem to have such a control, so ignore for now
@@ -1133,9 +1135,9 @@ SlangResult NVRTCDownstreamCompiler::compile(
         dstOptions[i] = cmdLine.m_args[i].getBuffer();
     }
 
-    // std::string_view lSource((const char *)sourceBlob->getBufferPointer(), sourceBlob->getBufferSize());
-    // std::cout << "sourceBlob:\n" << lSource << std::endl;
-    // for(auto& arg : dstOptions)
+    // std::string_view lSource((const char *)sourceBlob->getBufferPointer(),
+    // sourceBlob->getBufferSize()); std::cout << "sourceBlob:\n" << lSource << std::endl; for(auto&
+    // arg : dstOptions)
     // {
     //     std::cout << "- NVRTC arg: " << arg << std::endl;
     // }

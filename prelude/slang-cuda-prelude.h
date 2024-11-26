@@ -59,13 +59,11 @@
 #define SLANG_CUDA_WARP_BITMASK (~int(0))
 
 //
-#define SLANG_FORCE_INLINE inline
-
-#define SLANG_CUDA_CALL __device__
-
-#define SLANG_FORCE_INLINE inline
+#define SLANG_FORCE_INLINE __forceinline__
 #define SLANG_INLINE inline
 
+// Force inline every cuda device basic function
+#define SLANG_CUDA_CALL SLANG_FORCE_INLINE __device__
 
 // Since we are using unsigned arithmatic care is need in this comparison.
 // It is *assumed* that sizeInBytes >= elemSize. Which means (sizeInBytes >= elemSize) >= 0
@@ -2143,14 +2141,14 @@ struct RWByteAddressBuffer
 // For now I'll just assume you have a launch that makes the following correct if the kernel uses
 // WaveGetLaneIndex()
 #ifndef SLANG_USE_ASM_LANE_ID
-__forceinline__ __device__ uint32_t _getLaneId()
+SLANG_CUDA_CALL uint32_t _getLaneId()
 {
     // If the launch is (or I guess some multiple of the warp size)
     // we try this mechanism, which is apparently faster.
     return threadIdx.x & SLANG_CUDA_WARP_MASK;
 }
 #else
-__forceinline__ __device__ uint32_t _getLaneId()
+SLANG_CUDA_CALL uint32_t _getLaneId()
 {
     // https://stackoverflow.com/questions/44337309/whats-the-most-efficient-way-to-calculate-the-warp-id-lane-id-in-a-1-d-grid#
     // This mechanism is not the fastest way to do it, and that is why the other mechanism
@@ -2186,7 +2184,7 @@ typedef int WarpMask;
 // then we use _getActiveMask.
 
 // Return mask of all the lanes less than the current lane
-__forceinline__ __device__ WarpMask _getLaneLtMask()
+SLANG_CUDA_CALL WarpMask _getLaneLtMask()
 {
     return (int(1) << _getLaneId()) - 1;
 }
@@ -2194,20 +2192,20 @@ __forceinline__ __device__ WarpMask _getLaneLtMask()
 // TODO(JS):
 // THIS IS NOT CORRECT! That determining the appropriate active mask requires appropriate
 // mask tracking.
-__forceinline__ __device__ WarpMask _getActiveMask()
+SLANG_CUDA_CALL WarpMask _getActiveMask()
 {
     return __ballot_sync(__activemask(), true);
 }
 
 // Return a mask suitable for the 'MultiPrefix' style functions
-__forceinline__ __device__ WarpMask _getMultiPrefixMask(int mask)
+SLANG_CUDA_CALL WarpMask _getMultiPrefixMask(int mask)
 {
     return mask;
 }
 
 // Note! Note will return true if mask is 0, but thats okay, because there must be one
 // lane active to execute anything
-__inline__ __device__ bool _waveIsSingleLane(WarpMask mask)
+SLANG_CUDA_CALL bool _waveIsSingleLane(WarpMask mask)
 {
     return (mask & (mask - 1)) == 0;
 }
@@ -2219,7 +2217,7 @@ __inline__ __device__ bool _waveIsSingleLane(WarpMask mask)
 // 0b00000000'00000000'00000000'00011111 -> 0 (since 5 is not a power of 2)
 // 0b00000000'00000000'00000000'11110000 -> 0 (since the run of bits does not start at the LSB)
 // 0b00000000'00000000'00000000'00100111 -> 0 (since it is not a single contiguous run)
-__inline__ __device__ int _waveCalcPow2Offset(WarpMask mask)
+SLANG_CUDA_CALL int _waveCalcPow2Offset(WarpMask mask)
 {
     // This should be the most common case, so fast path it
     if (mask == SLANG_CUDA_WARP_BITMASK)
@@ -2240,7 +2238,7 @@ __inline__ __device__ int _waveCalcPow2Offset(WarpMask mask)
     return 0;
 }
 
-__inline__ __device__ bool _waveIsFirstLane()
+SLANG_CUDA_CALL bool _waveIsFirstLane()
 {
     const WarpMask mask = __activemask();
     // We special case bit 0, as that most warps are expected to be fully active.
@@ -2255,56 +2253,56 @@ __inline__ __device__ bool _waveIsFirstLane()
 template<typename T>
 struct WaveOpOr
 {
-    __inline__ __device__ static T getInitial(T a) { return 0; }
-    __inline__ __device__ static T doOp(T a, T b) { return a | b; }
+    SLANG_CUDA_CALL static T getInitial(T a) { return 0; }
+    SLANG_CUDA_CALL static T doOp(T a, T b) { return a | b; }
 };
 
 template<typename T>
 struct WaveOpAnd
 {
-    __inline__ __device__ static T getInitial(T a) { return ~T(0); }
-    __inline__ __device__ static T doOp(T a, T b) { return a & b; }
+    SLANG_CUDA_CALL static T getInitial(T a) { return ~T(0); }
+    SLANG_CUDA_CALL static T doOp(T a, T b) { return a & b; }
 };
 
 template<typename T>
 struct WaveOpXor
 {
-    __inline__ __device__ static T getInitial(T a) { return 0; }
-    __inline__ __device__ static T doOp(T a, T b) { return a ^ b; }
-    __inline__ __device__ static T doInverse(T a, T b) { return a ^ b; }
+    SLANG_CUDA_CALL static T getInitial(T a) { return 0; }
+    SLANG_CUDA_CALL static T doOp(T a, T b) { return a ^ b; }
+    SLANG_CUDA_CALL static T doInverse(T a, T b) { return a ^ b; }
 };
 
 template<typename T>
 struct WaveOpAdd
 {
-    __inline__ __device__ static T getInitial(T a) { return 0; }
-    __inline__ __device__ static T doOp(T a, T b) { return a + b; }
-    __inline__ __device__ static T doInverse(T a, T b) { return a - b; }
+    SLANG_CUDA_CALL static T getInitial(T a) { return 0; }
+    SLANG_CUDA_CALL static T doOp(T a, T b) { return a + b; }
+    SLANG_CUDA_CALL static T doInverse(T a, T b) { return a - b; }
 };
 
 template<typename T>
 struct WaveOpMul
 {
-    __inline__ __device__ static T getInitial(T a) { return T(1); }
-    __inline__ __device__ static T doOp(T a, T b) { return a * b; }
+    SLANG_CUDA_CALL static T getInitial(T a) { return T(1); }
+    SLANG_CUDA_CALL static T doOp(T a, T b) { return a * b; }
     // Using this inverse for int is probably undesirable - because in general it requires T to have
     // more precision There is also a performance aspect to it, where divides are generally
     // significantly slower
-    __inline__ __device__ static T doInverse(T a, T b) { return a / b; }
+    SLANG_CUDA_CALL static T doInverse(T a, T b) { return a / b; }
 };
 
 template<typename T>
 struct WaveOpMax
 {
-    __inline__ __device__ static T getInitial(T a) { return a; }
-    __inline__ __device__ static T doOp(T a, T b) { return a > b ? a : b; }
+    SLANG_CUDA_CALL static T getInitial(T a) { return a; }
+    SLANG_CUDA_CALL static T doOp(T a, T b) { return a > b ? a : b; }
 };
 
 template<typename T>
 struct WaveOpMin
 {
-    __inline__ __device__ static T getInitial(T a) { return a; }
-    __inline__ __device__ static T doOp(T a, T b) { return a < b ? a : b; }
+    SLANG_CUDA_CALL static T getInitial(T a) { return a; }
+    SLANG_CUDA_CALL static T doOp(T a, T b) { return a < b ? a : b; }
 };
 
 template<typename T>
@@ -2436,7 +2434,7 @@ struct ElementTypeTrait<Matrix<T, ROWS, COLS>>
 
 // Scalar
 template<typename INTF, typename T>
-__device__ T _waveReduceScalar(WarpMask mask, T val)
+SLANG_CUDA_CALL T _waveReduceScalar(WarpMask mask, T val)
 {
     const int offsetSize = _waveCalcPow2Offset(mask);
     if (offsetSize > 0)
@@ -2468,7 +2466,7 @@ __device__ T _waveReduceScalar(WarpMask mask, T val)
 
 // Multiple values
 template<typename INTF, typename T, size_t COUNT>
-__device__ void _waveReduceMultiple(WarpMask mask, T* val)
+SLANG_CUDA_CALL void _waveReduceMultiple(WarpMask mask, T* val)
 {
     const int offsetSize = _waveCalcPow2Offset(mask);
     if (offsetSize > 0)
@@ -2510,50 +2508,50 @@ __device__ void _waveReduceMultiple(WarpMask mask, T* val)
 }
 
 template<typename INTF, typename T>
-__device__ void _waveReduceMultiple(WarpMask mask, T* val)
+SLANG_CUDA_CALL void _waveReduceMultiple(WarpMask mask, T* val)
 {
     typedef typename ElementTypeTrait<T>::Type ElemType;
     _waveReduceMultiple<INTF, ElemType, sizeof(T) / sizeof(ElemType)>(mask, (ElemType*)val);
 }
 
 template<typename T>
-__inline__ __device__ T _waveOr(WarpMask mask, T val)
+SLANG_CUDA_CALL T _waveOr(WarpMask mask, T val)
 {
     return _waveReduceScalar<WaveOpOr<T>, T>(mask, val);
 }
 
 template<typename T>
-__inline__ __device__ T _waveAnd(WarpMask mask, T val)
+SLANG_CUDA_CALL T _waveAnd(WarpMask mask, T val)
 {
     return _waveReduceScalar<WaveOpAnd<T>, T>(mask, val);
 }
 
 template<typename T>
-__inline__ __device__ T _waveXor(WarpMask mask, T val)
+SLANG_CUDA_CALL T _waveXor(WarpMask mask, T val)
 {
     return _waveReduceScalar<WaveOpXor<T>, T>(mask, val);
 }
 
 template<typename T>
-__inline__ __device__ T _waveProduct(WarpMask mask, T val)
+SLANG_CUDA_CALL T _waveProduct(WarpMask mask, T val)
 {
     return _waveReduceScalar<WaveOpMul<T>, T>(mask, val);
 }
 
 template<typename T>
-__inline__ __device__ T _waveSum(WarpMask mask, T val)
+SLANG_CUDA_CALL T _waveSum(WarpMask mask, T val)
 {
     return _waveReduceScalar<WaveOpAdd<T>, T>(mask, val);
 }
 
 template<typename T>
-__inline__ __device__ T _waveMin(WarpMask mask, T val)
+SLANG_CUDA_CALL T _waveMin(WarpMask mask, T val)
 {
     return _waveReduceScalar<WaveOpMin<T>, T>(mask, val);
 }
 
 template<typename T>
-__inline__ __device__ T _waveMax(WarpMask mask, T val)
+SLANG_CUDA_CALL T _waveMax(WarpMask mask, T val)
 {
     return _waveReduceScalar<WaveOpMax<T>, T>(mask, val);
 }
@@ -2561,55 +2559,55 @@ __inline__ __device__ T _waveMax(WarpMask mask, T val)
 // Fast-path specializations when CUDA warp reduce operators are available
 #if __CUDA_ARCH__ >= 800 // 8.x or higher
 template<>
-__inline__ __device__ unsigned _waveOr<unsigned>(WarpMask mask, unsigned val)
+SLANG_CUDA_CALL unsigned _waveOr<unsigned>(WarpMask mask, unsigned val)
 {
     return __reduce_or_sync(mask, val);
 }
 
 template<>
-__inline__ __device__ unsigned _waveAnd<unsigned>(WarpMask mask, unsigned val)
+SLANG_CUDA_CALL unsigned _waveAnd<unsigned>(WarpMask mask, unsigned val)
 {
     return __reduce_and_sync(mask, val);
 }
 
 template<>
-__inline__ __device__ unsigned _waveXor<unsigned>(WarpMask mask, unsigned val)
+SLANG_CUDA_CALL unsigned _waveXor<unsigned>(WarpMask mask, unsigned val)
 {
     return __reduce_xor_sync(mask, val);
 }
 
 template<>
-__inline__ __device__ unsigned _waveSum<unsigned>(WarpMask mask, unsigned val)
+SLANG_CUDA_CALL unsigned _waveSum<unsigned>(WarpMask mask, unsigned val)
 {
     return __reduce_add_sync(mask, val);
 }
 
 template<>
-__inline__ __device__ int _waveSum<int>(WarpMask mask, int val)
+SLANG_CUDA_CALL int _waveSum<int>(WarpMask mask, int val)
 {
     return __reduce_add_sync(mask, val);
 }
 
 template<>
-__inline__ __device__ unsigned _waveMin<unsigned>(WarpMask mask, unsigned val)
+SLANG_CUDA_CALL unsigned _waveMin<unsigned>(WarpMask mask, unsigned val)
 {
     return __reduce_min_sync(mask, val);
 }
 
 template<>
-__inline__ __device__ int _waveMin<int>(WarpMask mask, int val)
+SLANG_CUDA_CALL int _waveMin<int>(WarpMask mask, int val)
 {
     return __reduce_min_sync(mask, val);
 }
 
 template<>
-__inline__ __device__ unsigned _waveMax<unsigned>(WarpMask mask, unsigned val)
+SLANG_CUDA_CALL unsigned _waveMax<unsigned>(WarpMask mask, unsigned val)
 {
     return __reduce_max_sync(mask, val);
 }
 
 template<>
-__inline__ __device__ int _waveMax<int>(WarpMask mask, int val)
+SLANG_CUDA_CALL int _waveMax<int>(WarpMask mask, int val)
 {
     return __reduce_max_sync(mask, val);
 }
@@ -2619,7 +2617,7 @@ __inline__ __device__ int _waveMax<int>(WarpMask mask, int val)
 // Multiple
 
 template<typename T>
-__inline__ __device__ T _waveOrMultiple(WarpMask mask, T val)
+SLANG_CUDA_CALL T _waveOrMultiple(WarpMask mask, T val)
 {
     typedef typename ElementTypeTrait<T>::Type ElemType;
     _waveReduceMultiple<WaveOpOr<ElemType>>(mask, &val);
@@ -2627,7 +2625,7 @@ __inline__ __device__ T _waveOrMultiple(WarpMask mask, T val)
 }
 
 template<typename T>
-__inline__ __device__ T _waveAndMultiple(WarpMask mask, T val)
+SLANG_CUDA_CALL T _waveAndMultiple(WarpMask mask, T val)
 {
     typedef typename ElementTypeTrait<T>::Type ElemType;
     _waveReduceMultiple<WaveOpAnd<ElemType>>(mask, &val);
@@ -2635,7 +2633,7 @@ __inline__ __device__ T _waveAndMultiple(WarpMask mask, T val)
 }
 
 template<typename T>
-__inline__ __device__ T _waveXorMultiple(WarpMask mask, T val)
+SLANG_CUDA_CALL T _waveXorMultiple(WarpMask mask, T val)
 {
     typedef typename ElementTypeTrait<T>::Type ElemType;
     _waveReduceMultiple<WaveOpXor<ElemType>>(mask, &val);
@@ -2643,7 +2641,7 @@ __inline__ __device__ T _waveXorMultiple(WarpMask mask, T val)
 }
 
 template<typename T>
-__inline__ __device__ T _waveProductMultiple(WarpMask mask, T val)
+SLANG_CUDA_CALL T _waveProductMultiple(WarpMask mask, T val)
 {
     typedef typename ElementTypeTrait<T>::Type ElemType;
     _waveReduceMultiple<WaveOpMul<ElemType>>(mask, &val);
@@ -2651,7 +2649,7 @@ __inline__ __device__ T _waveProductMultiple(WarpMask mask, T val)
 }
 
 template<typename T>
-__inline__ __device__ T _waveSumMultiple(WarpMask mask, T val)
+SLANG_CUDA_CALL T _waveSumMultiple(WarpMask mask, T val)
 {
     typedef typename ElementTypeTrait<T>::Type ElemType;
     _waveReduceMultiple<WaveOpAdd<ElemType>>(mask, &val);
@@ -2659,7 +2657,7 @@ __inline__ __device__ T _waveSumMultiple(WarpMask mask, T val)
 }
 
 template<typename T>
-__inline__ __device__ T _waveMinMultiple(WarpMask mask, T val)
+SLANG_CUDA_CALL T _waveMinMultiple(WarpMask mask, T val)
 {
     typedef typename ElementTypeTrait<T>::Type ElemType;
     _waveReduceMultiple<WaveOpMin<ElemType>>(mask, &val);
@@ -2667,7 +2665,7 @@ __inline__ __device__ T _waveMinMultiple(WarpMask mask, T val)
 }
 
 template<typename T>
-__inline__ __device__ T _waveMaxMultiple(WarpMask mask, T val)
+SLANG_CUDA_CALL T _waveMaxMultiple(WarpMask mask, T val)
 {
     typedef typename ElementTypeTrait<T>::Type ElemType;
     _waveReduceMultiple<WaveOpMax<ElemType>>(mask, &val);
@@ -2676,7 +2674,7 @@ __inline__ __device__ T _waveMaxMultiple(WarpMask mask, T val)
 
 
 template<typename T>
-__inline__ __device__ bool _waveAllEqual(WarpMask mask, T val)
+SLANG_CUDA_CALL bool _waveAllEqual(WarpMask mask, T val)
 {
     int pred;
     __match_all_sync(mask, val, &pred);
@@ -2684,7 +2682,7 @@ __inline__ __device__ bool _waveAllEqual(WarpMask mask, T val)
 }
 
 template<typename T>
-__inline__ __device__ bool _waveAllEqualMultiple(WarpMask mask, T inVal)
+SLANG_CUDA_CALL bool _waveAllEqualMultiple(WarpMask mask, T inVal)
 {
     typedef typename ElementTypeTrait<T>::Type ElemType;
     const size_t count = sizeof(T) / sizeof(ElemType);
@@ -2702,14 +2700,14 @@ __inline__ __device__ bool _waveAllEqualMultiple(WarpMask mask, T inVal)
 }
 
 template<typename T>
-__inline__ __device__ T _waveReadFirst(WarpMask mask, T val)
+SLANG_CUDA_CALL T _waveReadFirst(WarpMask mask, T val)
 {
     const int lowestLaneId = __ffs(mask) - 1;
     return __shfl_sync(mask, val, lowestLaneId);
 }
 
 template<typename T>
-__inline__ __device__ T _waveReadFirstMultiple(WarpMask mask, T inVal)
+SLANG_CUDA_CALL T _waveReadFirstMultiple(WarpMask mask, T inVal)
 {
     typedef typename ElementTypeTrait<T>::Type ElemType;
     const size_t count = sizeof(T) / sizeof(ElemType);
@@ -2725,7 +2723,7 @@ __inline__ __device__ T _waveReadFirstMultiple(WarpMask mask, T inVal)
 }
 
 template<typename T>
-__inline__ __device__ T _waveShuffleMultiple(WarpMask mask, T inVal, int lane)
+SLANG_CUDA_CALL T _waveShuffleMultiple(WarpMask mask, T inVal, int lane)
 {
     typedef typename ElementTypeTrait<T>::Type ElemType;
     const size_t count = sizeof(T) / sizeof(ElemType);
@@ -2744,7 +2742,7 @@ __inline__ __device__ T _waveShuffleMultiple(WarpMask mask, T inVal, int lane)
 // Invertable means that when we get to the end of the reduce, we can remove val (to make
 // exclusive), using the inverse of the op.
 template<typename INTF, typename T>
-__device__ T _wavePrefixInvertableScalar(WarpMask mask, T val)
+SLANG_CUDA_CALL T _wavePrefixInvertableScalar(WarpMask mask, T val)
 {
     const int offsetSize = _waveCalcPow2Offset(mask);
 
@@ -2794,7 +2792,7 @@ __device__ T _wavePrefixInvertableScalar(WarpMask mask, T val)
 // This implementation separately tracks the value to be propogated, and the value
 // that is the final result
 template<typename INTF, typename T>
-__device__ T _wavePrefixScalar(WarpMask mask, T val)
+SLANG_CUDA_CALL T _wavePrefixScalar(WarpMask mask, T val)
 {
     const int offsetSize = _waveCalcPow2Offset(mask);
 
@@ -2842,7 +2840,7 @@ __device__ T _wavePrefixScalar(WarpMask mask, T val)
 
 
 template<typename INTF, typename T, size_t COUNT>
-__device__ T _waveOpCopy(T* dst, const T* src)
+SLANG_CUDA_CALL T _waveOpCopy(T* dst, const T* src)
 {
     for (size_t j = 0; j < COUNT; ++j)
     {
@@ -2852,7 +2850,7 @@ __device__ T _waveOpCopy(T* dst, const T* src)
 
 
 template<typename INTF, typename T, size_t COUNT>
-__device__ T _waveOpDoInverse(T* inOut, const T* val)
+SLANG_CUDA_CALL T _waveOpDoInverse(T* inOut, const T* val)
 {
     for (size_t j = 0; j < COUNT; ++j)
     {
@@ -2861,7 +2859,7 @@ __device__ T _waveOpDoInverse(T* inOut, const T* val)
 }
 
 template<typename INTF, typename T, size_t COUNT>
-__device__ T _waveOpSetInitial(T* out, const T* val)
+SLANG_CUDA_CALL T _waveOpSetInitial(T* out, const T* val)
 {
     for (size_t j = 0; j < COUNT; ++j)
     {
@@ -2870,7 +2868,7 @@ __device__ T _waveOpSetInitial(T* out, const T* val)
 }
 
 template<typename INTF, typename T, size_t COUNT>
-__device__ T _wavePrefixInvertableMultiple(WarpMask mask, T* val)
+SLANG_CUDA_CALL T _wavePrefixInvertableMultiple(WarpMask mask, T* val)
 {
     const int offsetSize = _waveCalcPow2Offset(mask);
 
@@ -2928,7 +2926,7 @@ __device__ T _wavePrefixInvertableMultiple(WarpMask mask, T* val)
 }
 
 template<typename INTF, typename T, size_t COUNT>
-__device__ T _wavePrefixMultiple(WarpMask mask, T* val)
+SLANG_CUDA_CALL T _wavePrefixMultiple(WarpMask mask, T* val)
 {
     const int offsetSize = _waveCalcPow2Offset(mask);
 
@@ -2985,38 +2983,38 @@ __device__ T _wavePrefixMultiple(WarpMask mask, T* val)
 }
 
 template<typename T>
-__inline__ __device__ T _wavePrefixProduct(WarpMask mask, T val)
+SLANG_CUDA_CALL T _wavePrefixProduct(WarpMask mask, T val)
 {
     return _wavePrefixScalar<WaveOpMul<T>, T>(mask, val);
 }
 
 template<typename T>
-__inline__ __device__ T _wavePrefixSum(WarpMask mask, T val)
+SLANG_CUDA_CALL T _wavePrefixSum(WarpMask mask, T val)
 {
     return _wavePrefixInvertableScalar<WaveOpAdd<T>, T>(mask, val);
 }
 
 template<typename T>
-__inline__ __device__ T _wavePrefixXor(WarpMask mask, T val)
+SLANG_CUDA_CALL T _wavePrefixXor(WarpMask mask, T val)
 {
     return _wavePrefixInvertableScalar<WaveOpXor<T>, T>(mask, val);
 }
 
 template<typename T>
-__inline__ __device__ T _wavePrefixOr(WarpMask mask, T val)
+SLANG_CUDA_CALL T _wavePrefixOr(WarpMask mask, T val)
 {
     return _wavePrefixScalar<WaveOpOr<T>, T>(mask, val);
 }
 
 template<typename T>
-__inline__ __device__ T _wavePrefixAnd(WarpMask mask, T val)
+SLANG_CUDA_CALL T _wavePrefixAnd(WarpMask mask, T val)
 {
     return _wavePrefixScalar<WaveOpAnd<T>, T>(mask, val);
 }
 
 
 template<typename T>
-__inline__ __device__ T _wavePrefixProductMultiple(WarpMask mask, T val)
+SLANG_CUDA_CALL T _wavePrefixProductMultiple(WarpMask mask, T val)
 {
     typedef typename ElementTypeTrait<T>::Type ElemType;
     _wavePrefixInvertableMultiple<WaveOpMul<ElemType>, ElemType, sizeof(T) / sizeof(ElemType)>(
@@ -3026,7 +3024,7 @@ __inline__ __device__ T _wavePrefixProductMultiple(WarpMask mask, T val)
 }
 
 template<typename T>
-__inline__ __device__ T _wavePrefixSumMultiple(WarpMask mask, T val)
+SLANG_CUDA_CALL T _wavePrefixSumMultiple(WarpMask mask, T val)
 {
     typedef typename ElementTypeTrait<T>::Type ElemType;
     _wavePrefixInvertableMultiple<WaveOpAdd<ElemType>, ElemType, sizeof(T) / sizeof(ElemType)>(
@@ -3036,7 +3034,7 @@ __inline__ __device__ T _wavePrefixSumMultiple(WarpMask mask, T val)
 }
 
 template<typename T>
-__inline__ __device__ T _wavePrefixXorMultiple(WarpMask mask, T val)
+SLANG_CUDA_CALL T _wavePrefixXorMultiple(WarpMask mask, T val)
 {
     typedef typename ElementTypeTrait<T>::Type ElemType;
     _wavePrefixInvertableMultiple<WaveOpXor<ElemType>, ElemType, sizeof(T) / sizeof(ElemType)>(
@@ -3046,7 +3044,7 @@ __inline__ __device__ T _wavePrefixXorMultiple(WarpMask mask, T val)
 }
 
 template<typename T>
-__inline__ __device__ T _wavePrefixOrMultiple(WarpMask mask, T val)
+SLANG_CUDA_CALL T _wavePrefixOrMultiple(WarpMask mask, T val)
 {
     typedef typename ElementTypeTrait<T>::Type ElemType;
     _wavePrefixMultiple<WaveOpOr<ElemType>, ElemType, sizeof(T) / sizeof(ElemType)>(
@@ -3056,7 +3054,7 @@ __inline__ __device__ T _wavePrefixOrMultiple(WarpMask mask, T val)
 }
 
 template<typename T>
-__inline__ __device__ T _wavePrefixAndMultiple(WarpMask mask, T val)
+SLANG_CUDA_CALL T _wavePrefixAndMultiple(WarpMask mask, T val)
 {
     typedef typename ElementTypeTrait<T>::Type ElemType;
     _wavePrefixMultiple<WaveOpAnd<ElemType>, ElemType, sizeof(T) / sizeof(ElemType)>(
@@ -3066,14 +3064,14 @@ __inline__ __device__ T _wavePrefixAndMultiple(WarpMask mask, T val)
 }
 
 template<typename T>
-__inline__ __device__ uint4 _waveMatchScalar(WarpMask mask, T val)
+SLANG_CUDA_CALL uint4 _waveMatchScalar(WarpMask mask, T val)
 {
     int pred;
     return make_uint4(__match_all_sync(mask, val, &pred), 0, 0, 0);
 }
 
 template<typename T>
-__inline__ __device__ uint4 _waveMatchMultiple(WarpMask mask, const T& inVal)
+SLANG_CUDA_CALL uint4 _waveMatchMultiple(WarpMask mask, const T& inVal)
 {
     typedef typename ElementTypeTrait<T>::Type ElemType;
     const size_t count = sizeof(T) / sizeof(ElemType);
@@ -3087,12 +3085,12 @@ __inline__ __device__ uint4 _waveMatchMultiple(WarpMask mask, const T& inVal)
     return make_uint4(matchBits, 0, 0, 0);
 }
 
-__device__ uint getAt(dim3 a, int b)
+SLANG_CUDA_CALL uint getAt(dim3 a, int b)
 {
     SLANG_PRELUDE_ASSERT(b >= 0 && b < 3);
     return (&a.x)[b];
 }
-__device__ uint3 operator*(uint3 a, dim3 b)
+SLANG_CUDA_CALL uint3 operator*(uint3 a, dim3 b)
 {
     uint3 r;
     r.x = a.x * b.x;
@@ -3102,7 +3100,7 @@ __device__ uint3 operator*(uint3 a, dim3 b)
 }
 
 template<typename TResult, typename TInput>
-__inline__ __device__ TResult slang_bit_cast(TInput val)
+SLANG_CUDA_CALL TResult slang_bit_cast(TInput val)
 {
     return *(TResult*)(&val);
 }
@@ -3127,14 +3125,14 @@ struct RayDesc
     float TMax;
 };
 
-static __forceinline__ __device__ void* unpackOptiXRayPayloadPointer(uint32_t i0, uint32_t i1)
+static SLANG_CUDA_CALL void* unpackOptiXRayPayloadPointer(uint32_t i0, uint32_t i1)
 {
     const uint64_t uptr = static_cast<uint64_t>(i0) << 32 | i1;
     void* ptr = reinterpret_cast<void*>(uptr);
     return ptr;
 }
 
-static __forceinline__ __device__ void packOptiXRayPayloadPointer(
+static SLANG_CUDA_CALL void packOptiXRayPayloadPointer(
     void* ptr,
     uint32_t& i0,
     uint32_t& i1)
@@ -3144,7 +3142,7 @@ static __forceinline__ __device__ void packOptiXRayPayloadPointer(
     i1 = uptr & 0x00000000ffffffff;
 }
 
-static __forceinline__ __device__ void* getOptiXRayPayloadPtr()
+static SLANG_CUDA_CALL void* getOptiXRayPayloadPtr()
 {
     const uint32_t u0 = optixGetPayload_0();
     const uint32_t u1 = optixGetPayload_1();
@@ -3152,7 +3150,7 @@ static __forceinline__ __device__ void* getOptiXRayPayloadPtr()
 }
 
 template<typename T>
-__forceinline__ __device__ void* traceOptiXRay(
+SLANG_CUDA_CALL void* traceOptiXRay(
     OptixTraversableHandle AccelerationStructure,
     uint32_t RayFlags,
     uint32_t InstanceInclusionMask,
@@ -3193,34 +3191,34 @@ struct TensorView
     uint32_t dimensionCount;
 
     template<typename T>
-    __device__ T* data_ptr()
+    SLANG_CUDA_CALL T* data_ptr()
     {
         return reinterpret_cast<T*>(data);
     }
 
     template<typename T>
-    __device__ T* data_ptr_at(uint32_t index)
+    SLANG_CUDA_CALL T* data_ptr_at(uint32_t index)
     {
         uint64_t offset = strides[0] * index;
         return reinterpret_cast<T*>(data + offset);
     }
 
     template<typename T>
-    __device__ T* data_ptr_at(uint2 index)
+    SLANG_CUDA_CALL T* data_ptr_at(uint2 index)
     {
         uint64_t offset = strides[0] * index.x + strides[1] * index.y;
         return reinterpret_cast<T*>(data + offset);
     }
 
     template<typename T>
-    __device__ T* data_ptr_at(uint3 index)
+    SLANG_CUDA_CALL T* data_ptr_at(uint3 index)
     {
         uint64_t offset = strides[0] * index.x + strides[1] * index.y + strides[2] * index.z;
         return reinterpret_cast<T*>(data + offset);
     }
 
     template<typename T>
-    __device__ T* data_ptr_at(uint4 index)
+    SLANG_CUDA_CALL T* data_ptr_at(uint4 index)
     {
         uint64_t offset = strides[0] * index.x + strides[1] * index.y + strides[2] * index.z +
                           strides[3] * index.w;
@@ -3228,7 +3226,7 @@ struct TensorView
     }
 
     template<typename T, unsigned int N>
-    __device__ T* data_ptr_at(uint index[N])
+    SLANG_CUDA_CALL T* data_ptr_at(uint index[N])
     {
         uint64_t offset = 0;
         for (unsigned int i = 0; i < N; ++i)
@@ -3239,46 +3237,46 @@ struct TensorView
     }
 
     template<typename T>
-    __device__ T& load(uint32_t x)
+    SLANG_CUDA_CALL T& load(uint32_t x)
     {
         return *reinterpret_cast<T*>(data + strides[0] * x);
     }
     template<typename T>
-    __device__ T& load(uint32_t x, uint32_t y)
+    SLANG_CUDA_CALL T& load(uint32_t x, uint32_t y)
     {
         return *reinterpret_cast<T*>(data + strides[0] * x + strides[1] * y);
     }
     template<typename T>
-    __device__ T& load(uint2 index)
+    SLANG_CUDA_CALL T& load(uint2 index)
     {
         return *reinterpret_cast<T*>(data + strides[0] * index.x + strides[1] * index.y);
     }
     template<typename T>
-    __device__ T& load(uint32_t x, uint32_t y, uint32_t z)
+    SLANG_CUDA_CALL T& load(uint32_t x, uint32_t y, uint32_t z)
     {
         return *reinterpret_cast<T*>(data + strides[0] * x + strides[1] * y + strides[2] * z);
     }
     template<typename T>
-    __device__ T& load(uint3 index)
+    SLANG_CUDA_CALL T& load(uint3 index)
     {
         return *reinterpret_cast<T*>(
             data + strides[0] * index.x + strides[1] * index.y + strides[2] * index.z);
     }
     template<typename T>
-    __device__ T& load(uint32_t x, uint32_t y, uint32_t z, uint32_t w)
+    SLANG_CUDA_CALL T& load(uint32_t x, uint32_t y, uint32_t z, uint32_t w)
     {
         return *reinterpret_cast<T*>(
             data + strides[0] * x + strides[1] * y + strides[2] * z + strides[3] * w);
     }
     template<typename T>
-    __device__ T& load(uint4 index)
+    SLANG_CUDA_CALL T& load(uint4 index)
     {
         return *reinterpret_cast<T*>(
             data + strides[0] * index.x + strides[1] * index.y + strides[2] * index.z +
             strides[3] * index.w);
     }
     template<typename T>
-    __device__ T& load(uint32_t i0, uint32_t i1, uint32_t i2, uint32_t i3, uint32_t i4)
+    SLANG_CUDA_CALL T& load(uint32_t i0, uint32_t i1, uint32_t i2, uint32_t i3, uint32_t i4)
     {
         return *reinterpret_cast<T*>(
             data + strides[0] * i0 + strides[1] * i1 + strides[2] * i2 + strides[3] * i3 +
@@ -3287,7 +3285,7 @@ struct TensorView
 
     // Generic version of load
     template<typename T, unsigned int N>
-    __device__ T& load(uint index[N])
+    SLANG_CUDA_CALL T& load(uint index[N])
     {
         uint64_t offset = 0;
         for (unsigned int i = 0; i < N; ++i)
@@ -3298,46 +3296,46 @@ struct TensorView
     }
 
     template<typename T>
-    __device__ void store(uint32_t x, T val)
+    SLANG_CUDA_CALL void store(uint32_t x, T val)
     {
         *reinterpret_cast<T*>(data + strides[0] * x) = val;
     }
     template<typename T>
-    __device__ void store(uint32_t x, uint32_t y, T val)
+    SLANG_CUDA_CALL void store(uint32_t x, uint32_t y, T val)
     {
         *reinterpret_cast<T*>(data + strides[0] * x + strides[1] * y) = val;
     }
     template<typename T>
-    __device__ void store(uint2 index, T val)
+    SLANG_CUDA_CALL void store(uint2 index, T val)
     {
         *reinterpret_cast<T*>(data + strides[0] * index.x + strides[1] * index.y) = val;
     }
     template<typename T>
-    __device__ void store(uint32_t x, uint32_t y, uint32_t z, T val)
+    SLANG_CUDA_CALL void store(uint32_t x, uint32_t y, uint32_t z, T val)
     {
         *reinterpret_cast<T*>(data + strides[0] * x + strides[1] * y + strides[2] * z) = val;
     }
     template<typename T>
-    __device__ void store(uint3 index, T val)
+    SLANG_CUDA_CALL void store(uint3 index, T val)
     {
         *reinterpret_cast<T*>(
             data + strides[0] * index.x + strides[1] * index.y + strides[2] * index.z) = val;
     }
     template<typename T>
-    __device__ void store(uint32_t x, uint32_t y, uint32_t z, uint32_t w, T val)
+    SLANG_CUDA_CALL void store(uint32_t x, uint32_t y, uint32_t z, uint32_t w, T val)
     {
         *reinterpret_cast<T*>(
             data + strides[0] * x + strides[1] * y + strides[2] * z + strides[3] * w) = val;
     }
     template<typename T>
-    __device__ void store(uint4 index, T val)
+    SLANG_CUDA_CALL void store(uint4 index, T val)
     {
         *reinterpret_cast<T*>(
             data + strides[0] * index.x + strides[1] * index.y + strides[2] * index.z +
             strides[3] * index.w) = val;
     }
     template<typename T>
-    __device__ void store(uint32_t i0, uint32_t i1, uint32_t i2, uint32_t i3, uint32_t i4, T val)
+    SLANG_CUDA_CALL void store(uint32_t i0, uint32_t i1, uint32_t i2, uint32_t i3, uint32_t i4, T val)
     {
         *reinterpret_cast<T*>(
             data + strides[0] * i0 + strides[1] * i1 + strides[2] * i2 + strides[3] * i3 +
@@ -3346,7 +3344,7 @@ struct TensorView
 
     // Generic version
     template<typename T, unsigned int N>
-    __device__ void store(uint index[N], T val)
+    SLANG_CUDA_CALL void store(uint index[N], T val)
     {
         uint64_t offset = 0;
         for (unsigned int i = 0; i < N; ++i)
