@@ -955,6 +955,9 @@ SlangResult NVRTCDownstreamCompiler::compile(
         // the requirement.
         //
         cmdLine.addArg("-DSLANG_CUDA_ENABLE_OPTIX");
+
+        // We need this argument to compile callables in ptx.
+        cmdLine.addArg("-rdc=true");
     }
 
     // Add any compiler specific options

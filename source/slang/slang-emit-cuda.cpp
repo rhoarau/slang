@@ -310,11 +310,11 @@ void CUDASourceEmitter::emitFunctionPreambleImpl(IRInst* inst)
     }
     else if (inst->findDecoration<IRCudaHostDecoration>())
     {
-        m_writer->emit("__host__ ");
+        m_writer->emit("inline __host__ ");
     }
     else
     {
-        m_writer->emit("__device__ ");
+        m_writer->emit("inline __device__ ");
     }
 }
 
