@@ -65,7 +65,7 @@
 // Force inline every cuda device basic function
 #define SLANG_CUDA_CALL SLANG_FORCE_INLINE __device__
 
-// Since we are using unsigned arithmatic care is need in this comparison.
+// Since we are using unsigned arithmetic care is need in this comparison.
 // It is *assumed* that sizeInBytes >= elemSize. Which means (sizeInBytes >= elemSize) >= 0
 // Which means only a single test is needed
 
@@ -1904,34 +1904,34 @@ SLANG_CUDA_CALL uint32_t U64_countbits(uint64_t v)
 
 // ----------------------------- IPTR -----------------------------------------
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL intptr_t IPTR_abs(intptr_t f)
+SLANG_CUDA_CALL intptr_t IPTR_abs(intptr_t f)
 {
     return (f < 0) ? -f : f;
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL intptr_t IPTR_min(intptr_t a, intptr_t b)
+SLANG_CUDA_CALL intptr_t IPTR_min(intptr_t a, intptr_t b)
 {
     return a < b ? a : b;
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL intptr_t IPTR_max(intptr_t a, intptr_t b)
+SLANG_CUDA_CALL intptr_t IPTR_max(intptr_t a, intptr_t b)
 {
     return a > b ? a : b;
 }
 
 // ----------------------------- UPTR -----------------------------------------
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uintptr_t UPTR_abs(uintptr_t f)
+SLANG_CUDA_CALL uintptr_t UPTR_abs(uintptr_t f)
 {
     return f;
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uintptr_t UPTR_min(uintptr_t a, uintptr_t b)
+SLANG_CUDA_CALL uintptr_t UPTR_min(uintptr_t a, uintptr_t b)
 {
     return a < b ? a : b;
 }
 
-SLANG_FORCE_INLINE SLANG_CUDA_CALL uintptr_t UPTR_max(uintptr_t a, uintptr_t b)
+SLANG_CUDA_CALL uintptr_t UPTR_max(uintptr_t a, uintptr_t b)
 {
     return a > b ? a : b;
 }
