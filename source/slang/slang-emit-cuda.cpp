@@ -378,7 +378,8 @@ String CUDASourceEmitter::generateEntryPointNameImpl(IREntryPointDecoration* ent
         CASE(AnyHit, __anyhit__);
         CASE(ClosestHit, __closesthit__);
         CASE(Miss, __miss__);
-        CASE(Callable, __direct_callable__);
+        CASE(Callable, __continuation_callable__);
+        // CASE(Callable, __direct_callable__);
         //
         // There are two stages (or "program types") supported by OptiX
         // that Slang currently cannot target:

@@ -17304,7 +17304,8 @@ void CallShader(uint shaderIndex, inout Payload payload)
 {
     __target_switch
     {
-    case cuda: __intrinsic_asm "optixDirectCall<void>($0, $1)";
+    // case cuda: __intrinsic_asm "optixDirectCall<void>($0, $1)";
+    case cuda: __intrinsic_asm "optixContinuationCall<void>($0, $1)";
     case hlsl: __intrinsic_asm "CallShader";
     case glsl:
         {
